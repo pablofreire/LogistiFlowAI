@@ -47,6 +47,7 @@ public static class MessagingServiceCollectionExtensions
         services.TryAddSingleton<IntegrationEventDispatcher>();
         services.TryAddScoped<IIntegrationEventOutbox, OutboxIntegrationEventWriter>();
         services.TryAddScoped<InboxStore>();
+        services.TryAddSingleton<ConsumerReadiness>();
 
         if (configuration.GetValue($"{OutboxOptions.SectionName}:RelayEnabled", defaultValue: true))
         {
@@ -56,6 +57,7 @@ public static class MessagingServiceCollectionExtensions
         if (registry.Registrations.Count > 0 && configuration.GetValue($"{ConsumerOptions.SectionName}:Enabled", defaultValue: true))
         {
             services.AddHostedService<RabbitMqConsumerWorker>();
+            services.AddHealthChecks().AddCheck<ConsumerReadinessHealthCheck>("consumer-topology", tags: ["ready"]);
         }
 
         services.AddHealthChecks().AddCheck<RabbitMqHealthCheck>("rabbitmq", tags: ["messaging"]);

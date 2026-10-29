@@ -20,6 +20,9 @@ public interface IStockRepository
     /// <summary>Returns <paramref name="quantity"/> from reserved to available.</summary>
     Task ReleaseAsync(long stockPositionId, int quantity, CancellationToken cancellationToken);
 
+    /// <summary>Removes shipped units from both on-hand and reserved stock.</summary>
+    Task ConsumeAsync(long stockPositionId, int quantity, CancellationToken cancellationToken);
+
     /// <summary>Adds received units to on-hand stock, creating the position if needed. Returns <c>null</c> for an unknown SKU or warehouse.</summary>
     Task<long?> ReceiveAsync(string warehouseCode, string sku, int quantity, CancellationToken cancellationToken);
 

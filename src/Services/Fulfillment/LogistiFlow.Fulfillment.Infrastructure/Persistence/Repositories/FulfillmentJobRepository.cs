@@ -10,12 +10,18 @@ namespace LogistiFlow.Fulfillment.Infrastructure.Persistence.Repositories;
 
 public sealed class FulfillmentJobRepository(IDbSession session) : IFulfillmentJobRepository
 {
-    public async Task<FulfillmentJobEntity?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken)
+    public Task<FulfillmentJobEntity?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken) =>
+        GetAsync(FulfillmentJobQueries.SelectByOrderId, new { OrderId = orderId }, cancellationToken);
+
+    public Task<FulfillmentJobEntity?> GetByPublicIdAsync(Guid jobId, CancellationToken cancellationToken) =>
+        GetAsync(FulfillmentJobQueries.SelectByPublicId, new { PublicId = jobId }, cancellationToken);
+
+    private async Task<FulfillmentJobEntity?> GetAsync(string sql, object parameters, CancellationToken cancellationToken)
     {
         var connection = await session.GetConnectionAsync(cancellationToken);
         var row = await connection.QuerySingleOrDefaultAsync<FulfillmentJobRow>(new CommandDefinition(
-            FulfillmentJobQueries.SelectByOrderId,
-            new { OrderId = orderId },
+            sql,
+            parameters,
             session.Transaction,
             cancellationToken: cancellationToken));
         if (row is null)

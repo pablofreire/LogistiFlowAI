@@ -3,6 +3,7 @@ using LogistiFlow.BuildingBlocks.Web.Configuration;
 using LogistiFlow.BuildingBlocks.Web.Hosting;
 using LogistiFlow.Contracts.IntegrationEvents.Fulfillment;
 using LogistiFlow.Contracts.IntegrationEvents.Inventory;
+using LogistiFlow.Contracts.IntegrationEvents.Shipping;
 using LogistiFlow.Orders.Application.DependencyInjection;
 using LogistiFlow.Orders.Application.IntegrationEventHandlers;
 using LogistiFlow.Orders.Infrastructure.DependencyInjection;
@@ -20,7 +21,11 @@ builder.Services.AddOrdersInfrastructure(builder.Configuration);
 builder.Services.AddLogistiFlowMessaging(builder.Configuration, "orders", handlers => handlers
     .Add<InventoryReservedEvent, InventoryReservedEventHandler>()
     .Add<InventoryReservationFailedEvent, InventoryReservationFailedEventHandler>()
-    .Add<FulfillmentStartedEvent, FulfillmentStartedEventHandler>());
+    .Add<FulfillmentStartedEvent, FulfillmentStartedEventHandler>()
+    .Add<FulfillmentPackedEvent, FulfillmentPackedEventHandler>()
+    .Add<FulfillmentShippedEvent, FulfillmentShippedEventHandler>()
+    .Add<ShipmentDeliveredEvent, ShipmentDeliveredEventHandler>()
+    .Add<ShipmentReturnedEvent, ShipmentReturnedEventHandler>());
 
 var app = builder.Build();
 app.UseLogistiFlowServiceDefaults();

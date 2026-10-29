@@ -15,12 +15,18 @@ public sealed partial class OrderStatusEventApplier(
     TimeProvider timeProvider,
     ILogger<OrderStatusEventApplier> logger)
 {
-    public async Task ApplyAsync(Guid orderId, OrderStatus target, string reason, string source, CancellationToken cancellationToken)
+    public async Task ApplyAsync(
+        Guid orderId,
+        OrderStatus target,
+        string reason,
+        string source,
+        CancellationToken cancellationToken,
+        OrderStatus? requiredCurrent = null)
     {
         var order = await repository.GetByPublicIdAsync(orderId, cancellationToken)
             ?? throw new TransientIntegrationEventException($"Order {orderId} is not visible yet.");
 
-        var outcome = order.ApplyEventTransition(target, reason, source, timeProvider.GetUtcNow());
+        var outcome = order.ApplyEventTransition(target, reason, source, timeProvider.GetUtcNow(), requiredCurrent);
         switch (outcome)
         {
             case EventTransitionOutcome.Applied:

@@ -96,6 +96,21 @@ public sealed class FulfillmentJobEntity : Entity
         return Result.Success();
     }
 
+    /// <summary>Performs an operator action; the action decides the target status and the state machine guards it.</summary>
+    public Result Perform(FulfillmentJobAction action, string? reason, string source, DateTimeOffset now)
+    {
+        var (target, defaultReason) = action switch
+        {
+            FulfillmentJobAction.Pack => (FulfillmentJobStatus.Packed, "Packed"),
+            FulfillmentJobAction.Ship => (FulfillmentJobStatus.Shipped, $"Shipped from {WarehouseCode}"),
+            FulfillmentJobAction.ReportIssue => (FulfillmentJobStatus.Failed, "Issue reported"),
+            FulfillmentJobAction.Reprocess => (FulfillmentJobStatus.Picking, "Reprocessing after a failure"),
+            _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Unknown fulfillment action."),
+        };
+
+        return TransitionTo(target, string.IsNullOrWhiteSpace(reason) ? defaultReason : reason.Trim(), source, now);
+    }
+
     public void MarkPersisted(int storedVersion)
     {
         Version = storedVersion;

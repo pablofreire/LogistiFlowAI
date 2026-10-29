@@ -62,7 +62,15 @@ public sealed class CreateOrderUseCase(
                 }
 
                 await outbox.EnqueueAsync(
-                    new OrderCreatedEvent(order.PublicId, order.OrderNumber, order.ToLineItems(), order.CreatedAt),
+                    new OrderCreatedEvent(
+                        order.PublicId,
+                        order.OrderNumber,
+                        order.ToLineItems(),
+                        order.CreatedAt,
+                        order.CustomerName,
+                        order.DestinationCity,
+                        order.DestinationCountry,
+                        order.PromisedDeliveryDate),
                     token);
 
                 return Result.Success(new CreateOrderResponse(order.ToDetails(), Replayed: false));

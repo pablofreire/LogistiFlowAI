@@ -155,13 +155,27 @@ public sealed class OrderEntity : Entity
     /// failing this distinguishes an event that is already superseded (ignore it) from one that arrived before
     /// its prerequisite (retry it later).
     /// </summary>
-    public EventTransitionOutcome ApplyEventTransition(OrderStatus target, string? reason, string source, DateTimeOffset now)
+    public EventTransitionOutcome ApplyEventTransition(
+        OrderStatus target,
+        string? reason,
+        string source,
+        DateTimeOffset now,
+        OrderStatus? requiredCurrent = null)
     {
         if (Status == target
             || OrderStateMachine.IsTerminal(Status)
             || OrderStateMachine.ProgressRank(Status) > OrderStateMachine.ProgressRank(target))
         {
             return EventTransitionOutcome.Stale;
+        }
+
+        // Off-path targets such as Failed are reachable from several statuses. An event that only makes sense after
+        // a given status (a return needs a shipped order) waits for it instead of skipping steps.
+        if (requiredCurrent is { } required && Status != required)
+        {
+            return OrderStateMachine.ProgressRank(Status) < OrderStateMachine.ProgressRank(required)
+                ? EventTransitionOutcome.NotYetApplicable
+                : EventTransitionOutcome.Stale;
         }
 
         if (!OrderStateMachine.CanTransition(Status, target))

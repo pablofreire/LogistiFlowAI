@@ -44,6 +44,21 @@ public sealed class StockRepository(IDbSession session) : IStockRepository
         return affected == 1;
     }
 
+    public async Task ConsumeAsync(long stockPositionId, int quantity, CancellationToken cancellationToken)
+    {
+        var connection = await session.GetConnectionAsync(cancellationToken);
+        var affected = await connection.ExecuteAsync(new CommandDefinition(
+            StockQueries.Consume,
+            new { Id = stockPositionId, Quantity = quantity },
+            session.Transaction,
+            cancellationToken: cancellationToken));
+
+        if (affected != 1)
+        {
+            throw new InvalidOperationException($"Stock position {stockPositionId} holds fewer than {quantity} reserved units to ship.");
+        }
+    }
+
     public async Task ReleaseAsync(long stockPositionId, int quantity, CancellationToken cancellationToken)
     {
         var connection = await session.GetConnectionAsync(cancellationToken);

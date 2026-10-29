@@ -7,6 +7,10 @@ public static class FulfillmentErrors
 {
     public static readonly Error JobNotFound = Error.NotFound("fulfillment.job_not_found", "The fulfillment job does not exist.");
 
+    public static readonly Error ConcurrentModification = Error.Conflict(
+        "fulfillment.concurrent_modification",
+        "The fulfillment job was changed by someone else. Reload it and try again.");
+
     public static Error InvalidTransition(FulfillmentJobStatus from, FulfillmentJobStatus to) => Error.Conflict(
         "fulfillment.invalid_transition",
         $"A fulfillment job in status {from} cannot move to {to}.");

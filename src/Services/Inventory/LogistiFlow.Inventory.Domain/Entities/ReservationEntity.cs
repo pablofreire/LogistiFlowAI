@@ -73,6 +73,19 @@ public sealed class ReservationEntity : Entity
         return true;
     }
 
+    /// <summary>Returns <c>true</c> when the reservation held stock and the shipment now takes it.</summary>
+    public bool Consume(DateTimeOffset now)
+    {
+        if (Status != ReservationStatus.Reserved)
+        {
+            return false;
+        }
+
+        Status = ReservationStatus.Consumed;
+        Touch(now);
+        return true;
+    }
+
     private static ReservationEntity Create(
         Guid orderId,
         string orderNumber,

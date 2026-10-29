@@ -1,9 +1,12 @@
+using FluentValidation;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.CancelForOrder.Implementations;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.CancelForOrder.Interfaces;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.Get.Implementations;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.Get.Interfaces;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.List.Implementations;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.List.Interfaces;
+using LogistiFlow.Fulfillment.Application.UseCases.Jobs.PerformAction.Implementations;
+using LogistiFlow.Fulfillment.Application.UseCases.Jobs.PerformAction.Interfaces;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.Start.Implementations;
 using LogistiFlow.Fulfillment.Application.UseCases.Jobs.Start.Interfaces;
 using LogistiFlow.Fulfillment.Application.UseCases.Metrics.GetSummary.Implementations;
@@ -16,7 +19,10 @@ public static class FulfillmentApplicationServiceCollectionExtensions
 {
     public static IServiceCollection AddFulfillmentApplication(this IServiceCollection services)
     {
+        services.AddValidatorsFromAssemblyContaining<PerformFulfillmentJobActionUseCase>(ServiceLifetime.Singleton);
+
         services.AddScoped<IStartFulfillmentUseCase, StartFulfillmentUseCase>();
+        services.AddScoped<IPerformFulfillmentJobActionUseCase, PerformFulfillmentJobActionUseCase>();
         services.AddScoped<ICancelFulfillmentForOrderUseCase, CancelFulfillmentForOrderUseCase>();
         services.AddScoped<IListFulfillmentJobsUseCase, ListFulfillmentJobsUseCase>();
         services.AddScoped<IGetFulfillmentJobUseCase, GetFulfillmentJobUseCase>();

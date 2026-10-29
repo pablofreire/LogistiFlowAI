@@ -16,4 +16,7 @@ public enum ReservationStatus
     /// and reserves nothing.
     /// </summary>
     Cancelled = 3,
+
+    /// <summary>The order shipped: the held units left on-hand stock.</summary>
+    Consumed = 4,
 }

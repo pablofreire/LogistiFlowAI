@@ -26,6 +26,7 @@ public sealed partial class RabbitMqConsumerWorker(
     IRabbitMqConnectionProvider connectionProvider,
     IntegrationEventDispatcher dispatcher,
     IntegrationEventHandlerRegistry registry,
+    ConsumerReadiness readiness,
     IOptions<RabbitMqOptions> rabbitOptions,
     IOptions<MessagingOptions> messagingOptions,
     IOptions<ConsumerOptions> consumerOptions,
@@ -81,6 +82,7 @@ public sealed partial class RabbitMqConsumerWorker(
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += (_, delivery) => OnDeliveryAsync(channel, queue, delivery, stoppingToken);
         await channel.BasicConsumeAsync(queue, autoAck: false, consumer, stoppingToken);
+        readiness.MarkTopologyDeclared();
         LogConsuming(logger, queue, registry.Registrations.Count);
 
         // Connection-level failures are healed by automatic recovery. A channel closed while the connection is

@@ -7,6 +7,8 @@ using LogistiFlow.Inventory.Application.UseCases.Products.Create.Implementations
 using LogistiFlow.Inventory.Application.UseCases.Products.Create.Interfaces;
 using LogistiFlow.Inventory.Application.UseCases.Products.List.Implementations;
 using LogistiFlow.Inventory.Application.UseCases.Products.List.Interfaces;
+using LogistiFlow.Inventory.Application.UseCases.Reservations.Consume.Implementations;
+using LogistiFlow.Inventory.Application.UseCases.Reservations.Consume.Interfaces;
 using LogistiFlow.Inventory.Application.UseCases.Reservations.GetByOrder.Implementations;
 using LogistiFlow.Inventory.Application.UseCases.Reservations.GetByOrder.Interfaces;
 using LogistiFlow.Inventory.Application.UseCases.Reservations.Release.Implementations;
@@ -31,6 +33,7 @@ public static class InventoryApplicationServiceCollectionExtensions
 
         services.AddScoped<IReserveInventoryUseCase, ReserveInventoryUseCase>();
         services.AddScoped<IReleaseInventoryUseCase, ReleaseInventoryUseCase>();
+        services.AddScoped<IConsumeReservationUseCase, ConsumeReservationUseCase>();
         services.AddScoped<IGetReservationByOrderUseCase, GetReservationByOrderUseCase>();
         services.AddScoped<IListProductsUseCase, ListProductsUseCase>();
         services.AddScoped<ICreateProductUseCase, CreateProductUseCase>();

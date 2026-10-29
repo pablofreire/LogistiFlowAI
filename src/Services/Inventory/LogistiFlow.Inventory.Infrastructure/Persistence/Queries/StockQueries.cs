@@ -28,6 +28,12 @@ internal static class StockQueries
         WHERE id = @Id AND reserved >= @Quantity
         """;
 
+    public const string Consume = """
+        UPDATE inventory.stock_positions
+        SET on_hand = on_hand - @Quantity, reserved = reserved - @Quantity, version = version + 1, updated_at = now()
+        WHERE id = @Id AND reserved >= @Quantity AND on_hand >= @Quantity
+        """;
+
     public const string Receive = """
         INSERT INTO inventory.stock_positions (public_id, product_id, warehouse_id, on_hand, reserved, created_at, updated_at)
         SELECT @PublicId, p.id, w.id, @Quantity, 0, now(), now()

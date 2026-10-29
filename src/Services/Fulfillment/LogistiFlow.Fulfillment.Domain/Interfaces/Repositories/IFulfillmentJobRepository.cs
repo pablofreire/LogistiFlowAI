@@ -6,6 +6,8 @@ public interface IFulfillmentJobRepository
 {
     Task<FulfillmentJobEntity?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken);
 
+    Task<FulfillmentJobEntity?> GetByPublicIdAsync(Guid jobId, CancellationToken cancellationToken);
+
     /// <summary>Returns <c>false</c> when a job already exists for the order.</summary>
     Task<bool> TryAddAsync(FulfillmentJobEntity job, CancellationToken cancellationToken);
 
