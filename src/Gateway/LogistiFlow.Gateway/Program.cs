@@ -2,6 +2,11 @@ using LogistiFlow.BuildingBlocks.Web.Configuration;
 using LogistiFlow.BuildingBlocks.Web.Hosting;
 using LogistiFlow.Gateway.DependencyInjection;
 
+if (HealthProbe.IsRequested(args))
+{
+    return await HealthProbe.RunAsync();
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddLogistiFlowServiceDefaults("gateway");

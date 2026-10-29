@@ -7,6 +7,11 @@ using LogistiFlow.Fulfillment.Application.DependencyInjection;
 using LogistiFlow.Fulfillment.Application.IntegrationEventHandlers;
 using LogistiFlow.Fulfillment.Infrastructure.DependencyInjection;
 
+if (HealthProbe.IsRequested(args))
+{
+    return await HealthProbe.RunAsync();
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddLogistiFlowServiceDefaults("fulfillment-api");

@@ -28,7 +28,13 @@ public static class ServiceDefaultsExtensions
 
         builder.Services
             .AddControllers()
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
+                // Numbers are numbers: keeps the OpenAPI contract (and the generated TypeScript types) precise.
+                options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+            })
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
@@ -43,6 +49,13 @@ public static class ServiceDefaultsExtensions
                     return new BadRequestObjectResult(ApiResponse.Fail(error, context.HttpContext.TraceIdentifier));
                 };
             });
+
+        // The OpenAPI generator reads the HTTP JSON options, not the MVC ones: keep both identical.
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+        });
 
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();

@@ -6,6 +6,11 @@ using LogistiFlow.Inventory.Application.DependencyInjection;
 using LogistiFlow.Inventory.Application.IntegrationEventHandlers;
 using LogistiFlow.Inventory.Infrastructure.DependencyInjection;
 
+if (HealthProbe.IsRequested(args))
+{
+    return await HealthProbe.RunAsync();
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddLogistiFlowServiceDefaults("inventory-api");
