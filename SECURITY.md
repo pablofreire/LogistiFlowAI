@@ -16,3 +16,6 @@ a public issue.
 ## Local development defaults
 `docker-compose.yml` and `appsettings.Development.json` contain development-only defaults (database password,
 JWT signing key, demo password). They are not secrets and must be overridden outside a local machine.
+
+## Third-party licenses
+Runtime and test dependencies are MIT, Apache-2.0, BSD, the PostgreSQL License (Npgsql) or Apache-2.0/MPL-2.0 dual (RabbitMQ.Client), all compatible with this project's MIT license. Checked 2026-10-29 against the pinned versions in `Directory.Packages.props` and the npm lockfiles.

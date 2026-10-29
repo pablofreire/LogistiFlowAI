@@ -5,7 +5,7 @@ in the code, not yet proven end to end · **Planned** = on the roadmap, not star
 
 | Job requirement | Project evidence | Status |
 |---|---|---|
-| C# / .NET | .NET 10 services, warnings as errors, analyzers (`src/`) | Validated (CI build, 170 unit tests) |
+| C# / .NET | .NET 10 services, warnings as errors, analyzers (`src/`) | Validated (local build with 0 warnings, Docker Release publish, 170 unit tests) |
 | REST APIs | Orders, Inventory, Fulfillment, Gateway controllers; OpenAPI in `docs/api` | Validated (integration + E2E) |
 | Microservices | 4 deployables, database per service, isolation enforced by `tests/architecture/ServiceBoundaryTests` | Validated |
 | Event-driven integration | RabbitMQ, transactional outbox, inbox, retry tiers, DLQ (`src/BuildingBlocks/LogistiFlow.BuildingBlocks.Messaging`) | Validated (`tests/integration/Messaging`) |
