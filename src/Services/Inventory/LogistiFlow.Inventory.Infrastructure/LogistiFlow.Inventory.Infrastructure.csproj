@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/LogistiFlow.BuildingBlocks.Infrastructure/LogistiFlow.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../LogistiFlow.Inventory.Application/LogistiFlow.Inventory.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\*.sql" />
+  </ItemGroup>
+
+</Project>

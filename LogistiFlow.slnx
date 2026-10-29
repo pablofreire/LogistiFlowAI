@@ -17,4 +17,16 @@
     <Project Path="src/Services/Orders/LogistiFlow.Orders.Infrastructure/LogistiFlow.Orders.Infrastructure.csproj" />
     <Project Path="src/Services/Orders/LogistiFlow.Orders.Api/LogistiFlow.Orders.Api.csproj" />
   </Folder>
+  <Folder Name="/src/Services/Inventory/">
+    <Project Path="src/Services/Inventory/LogistiFlow.Inventory.Domain/LogistiFlow.Inventory.Domain.csproj" />
+    <Project Path="src/Services/Inventory/LogistiFlow.Inventory.Application/LogistiFlow.Inventory.Application.csproj" />
+    <Project Path="src/Services/Inventory/LogistiFlow.Inventory.Infrastructure/LogistiFlow.Inventory.Infrastructure.csproj" />
+    <Project Path="src/Services/Inventory/LogistiFlow.Inventory.Api/LogistiFlow.Inventory.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/Fulfillment/">
+    <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Domain/LogistiFlow.Fulfillment.Domain.csproj" />
+    <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Application/LogistiFlow.Fulfillment.Application.csproj" />
+    <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Infrastructure/LogistiFlow.Fulfillment.Infrastructure.csproj" />
+    <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Api/LogistiFlow.Fulfillment.Api.csproj" />
+  </Folder>
 </Solution>
