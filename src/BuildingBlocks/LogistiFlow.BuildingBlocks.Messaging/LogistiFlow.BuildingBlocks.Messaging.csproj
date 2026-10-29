@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" />
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../LogistiFlow.BuildingBlocks.Infrastructure/LogistiFlow.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\*.sql" />
+  </ItemGroup>
+
+</Project>

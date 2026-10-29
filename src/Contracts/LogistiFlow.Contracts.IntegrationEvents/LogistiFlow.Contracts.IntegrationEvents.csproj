@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Published language between services: versioned event records only. No domain types, no framework dependencies. -->
+
+</Project>

@@ -1,0 +1,56 @@
+name: logistiflow
+
+# Local stack. Infrastructure only by default; `--profile app` adds the services, gateway and web app.
+# Copy .env.example to .env to override the development defaults below.
+
+x-service-env: &service-env
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://+:8080
+  Logging__Json: "true"
+  RabbitMq__HostName: rabbitmq
+  RabbitMq__Port: "5672"
+  RabbitMq__UserName: ${RABBITMQ_USER:-logistiflow}
+  RabbitMq__Password: ${RABBITMQ_PASSWORD:-logistiflow_dev}
+  Jwt__SigningKey: ${JWT_SIGNING_KEY:-local-development-signing-key-not-for-production}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+
+x-db: &db
+  Host=postgres;Port=5432;Username=${POSTGRES_USER:-logistiflow};Password=${POSTGRES_PASSWORD:-logistiflow_dev}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-logistiflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-logistiflow_dev}
+      POSTGRES_DB: postgres
+    command: ["postgres", "-c", "max_connections=300"]
+    ports:
+      - "${POSTGRES_PORT:-55450}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-logistiflow} -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-logistiflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-logistiflow_dev}
+    ports:
+      - "${RABBITMQ_PORT:-5682}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15682}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+volumes:
+  postgres-data:
+  rabbitmq-data:

@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/LogistiFlow.BuildingBlocks.Domain/LogistiFlow.BuildingBlocks.Domain.csproj" />
+    <Project Path="src/BuildingBlocks/LogistiFlow.BuildingBlocks.Application/LogistiFlow.BuildingBlocks.Application.csproj" />
+    <Project Path="src/BuildingBlocks/LogistiFlow.BuildingBlocks.Infrastructure/LogistiFlow.BuildingBlocks.Infrastructure.csproj" />
+    <Project Path="src/BuildingBlocks/LogistiFlow.BuildingBlocks.Messaging/LogistiFlow.BuildingBlocks.Messaging.csproj" />
+    <Project Path="src/BuildingBlocks/LogistiFlow.BuildingBlocks.Web/LogistiFlow.BuildingBlocks.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Contracts/">
+    <Project Path="src/Contracts/LogistiFlow.Contracts.IntegrationEvents/LogistiFlow.Contracts.IntegrationEvents.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Orders/">
+    <Project Path="src/Services/Orders/LogistiFlow.Orders.Domain/LogistiFlow.Orders.Domain.csproj" />
+    <Project Path="src/Services/Orders/LogistiFlow.Orders.Application/LogistiFlow.Orders.Application.csproj" />
+    <Project Path="src/Services/Orders/LogistiFlow.Orders.Infrastructure/LogistiFlow.Orders.Infrastructure.csproj" />
+    <Project Path="src/Services/Orders/LogistiFlow.Orders.Api/LogistiFlow.Orders.Api.csproj" />
+  </Folder>
+</Solution>

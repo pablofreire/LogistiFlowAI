@@ -1,0 +1,39 @@
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+TestResults/
+*.binlog
+*.user
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Playwright
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+tests/e2e/blob-report/
+tests/e2e/.auth/
+
+# k6 raw output (summaries worth keeping are copied into docs/performance)
+tests/performance/k6/results/*.json
+!tests/performance/k6/results/.gitkeep
+
+# Secrets and local runtime data
+.env
+*.pfx
+data/
+
+# OS
+.DS_Store
+Thumbs.db
