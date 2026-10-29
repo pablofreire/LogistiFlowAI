@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Stands in for third-party carrier APIs. It deliberately references no LogistiFlow project. -->
+
+</Project>

@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LogistiFlow.IntegrationTests.Fixtures;
 
@@ -8,7 +10,9 @@ namespace LogistiFlow.IntegrationTests.Fixtures;
 /// Hosts one real service in-process against the test containers. Settings are passed with
 /// <c>UseSetting</c> so they are visible while <c>Program</c> registers services.
 /// </summary>
-public sealed class ServiceFactory<TMarker>(IReadOnlyDictionary<string, string?> settings) : WebApplicationFactory<TMarker>
+public sealed class ServiceFactory<TMarker>(
+    IReadOnlyDictionary<string, string?> settings,
+    Action<IServiceCollection>? configureServices = null) : WebApplicationFactory<TMarker>
     where TMarker : class
 {
     public HttpClient CreateClientAs(string? role)
@@ -28,6 +32,11 @@ public sealed class ServiceFactory<TMarker>(IReadOnlyDictionary<string, string?>
         foreach (var (key, value) in settings)
         {
             builder.UseSetting(key, value);
+        }
+
+        if (configureServices is not null)
+        {
+            builder.ConfigureTestServices(configureServices);
         }
     }
 }

@@ -44,12 +44,18 @@ public static class ApiJson
         return client.SendAsync(request);
     }
 
-    public static object OrderBody(string sku, int quantity, string customer = "Integration Test Retail") => new
+    public static object OrderBody(
+        string sku,
+        int quantity,
+        string customer = "Integration Test Retail",
+        string city = "Austin",
+        string country = "US",
+        string? promisedDeliveryDate = "2026-12-01") => new
     {
         customerName = customer,
-        destinationCity = "Austin",
-        destinationCountry = "US",
-        promisedDeliveryDate = "2026-12-01",
+        destinationCity = city,
+        destinationCountry = country,
+        promisedDeliveryDate,
         lines = new[] { new { sku, quantity } },
     };
 }

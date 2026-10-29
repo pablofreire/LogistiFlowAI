@@ -1,4 +1,5 @@
 using LogistiFlow.ArchitectureTests.Support;
+using LogistiFlow.CarrierSimulator.Composition;
 
 namespace LogistiFlow.ArchitectureTests;
 
@@ -46,5 +47,16 @@ public sealed class ServiceBoundaryTests
         buildingBlocks.Should().NotBeEmpty();
         buildingBlocks.SelectMany(assembly => assembly.GetReferencedAssemblies())
             .Should().NotContain(reference => Solution.Services.Any(service => reference.Name!.StartsWith($"LogistiFlow.{service}.", StringComparison.Ordinal)));
+    }
+
+    /// <summary>The carrier simulator stands in for a third party: it must not share code with LogistiFlow.</summary>
+    [Fact]
+    public void CarrierSimulator_ReferencesNoLogistiFlowAssembly()
+    {
+        var simulator = typeof(CarrierSimulatorMarker).Assembly;
+
+        simulator.GetName().Name.Should().Be("LogistiFlow.CarrierSimulator");
+        simulator.GetReferencedAssemblies()
+            .Should().NotContain(reference => reference.Name!.StartsWith("LogistiFlow.", StringComparison.Ordinal));
     }
 }

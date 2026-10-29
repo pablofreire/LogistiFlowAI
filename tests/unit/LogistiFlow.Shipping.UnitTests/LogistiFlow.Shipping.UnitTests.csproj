@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Services/Shipping/LogistiFlow.Shipping.Application/LogistiFlow.Shipping.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -2,6 +2,7 @@ using System.Reflection;
 using LogistiFlow.Fulfillment.Api.Composition;
 using LogistiFlow.Inventory.Api.Composition;
 using LogistiFlow.Orders.Api.Composition;
+using LogistiFlow.Shipping.Api.Composition;
 using NetArchTest.Rules;
 
 namespace LogistiFlow.ArchitectureTests.Support;
@@ -9,7 +10,7 @@ namespace LogistiFlow.ArchitectureTests.Support;
 /// <summary>Loads every production assembly once and exposes them by service and layer.</summary>
 internal static class Solution
 {
-    public static readonly string[] Services = ["Orders", "Inventory", "Fulfillment"];
+    public static readonly string[] Services = ["Orders", "Inventory", "Fulfillment", "Shipping"];
 
     public static readonly string[] Layers = ["Domain", "Application", "Infrastructure", "Api"];
 
@@ -37,7 +38,7 @@ internal static class Solution
 
     private static List<Assembly> LoadAll()
     {
-        var roots = new[] { typeof(OrdersApiMarker).Assembly, typeof(InventoryApiMarker).Assembly, typeof(FulfillmentApiMarker).Assembly };
+        var roots = new[] { typeof(OrdersApiMarker).Assembly, typeof(InventoryApiMarker).Assembly, typeof(FulfillmentApiMarker).Assembly, typeof(ShippingApiMarker).Assembly };
         var loaded = new Dictionary<string, Assembly>(StringComparer.Ordinal);
         var pending = new Queue<Assembly>(roots);
         while (pending.Count > 0)

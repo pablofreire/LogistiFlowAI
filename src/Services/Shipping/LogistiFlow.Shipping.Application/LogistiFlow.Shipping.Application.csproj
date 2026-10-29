@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/LogistiFlow.BuildingBlocks.Application/LogistiFlow.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="../LogistiFlow.Shipping.Domain/LogistiFlow.Shipping.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

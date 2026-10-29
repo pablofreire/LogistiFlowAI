@@ -32,10 +32,20 @@
     <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Infrastructure/LogistiFlow.Fulfillment.Infrastructure.csproj" />
     <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Api/LogistiFlow.Fulfillment.Api.csproj" />
   </Folder>
+  <Folder Name="/src/Services/Shipping/">
+    <Project Path="src/Services/Shipping/LogistiFlow.Shipping.Domain/LogistiFlow.Shipping.Domain.csproj" />
+    <Project Path="src/Services/Shipping/LogistiFlow.Shipping.Application/LogistiFlow.Shipping.Application.csproj" />
+    <Project Path="src/Services/Shipping/LogistiFlow.Shipping.Infrastructure/LogistiFlow.Shipping.Infrastructure.csproj" />
+    <Project Path="src/Services/Shipping/LogistiFlow.Shipping.Api/LogistiFlow.Shipping.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Simulators/">
+    <Project Path="src/Simulators/LogistiFlow.CarrierSimulator/LogistiFlow.CarrierSimulator.csproj" />
+  </Folder>
   <Folder Name="/tests/unit/">
     <Project Path="tests/unit/LogistiFlow.Orders.UnitTests/LogistiFlow.Orders.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.Inventory.UnitTests/LogistiFlow.Inventory.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.Fulfillment.UnitTests/LogistiFlow.Fulfillment.UnitTests.csproj" />
+    <Project Path="tests/unit/LogistiFlow.Shipping.UnitTests/LogistiFlow.Shipping.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.BuildingBlocks.UnitTests/LogistiFlow.BuildingBlocks.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tests/architecture/">

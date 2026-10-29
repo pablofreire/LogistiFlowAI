@@ -17,4 +17,7 @@ public static class AuthorizationPolicies
 
     /// <summary>Warehouse floor actions such as picking and packing.</summary>
     public const string OperateWarehouse = "warehouse.operate";
+
+    /// <summary>Resolve shipment exceptions and retry failed carrier bookings.</summary>
+    public const string ManageShipments = "shipments.manage";
 }
