@@ -74,7 +74,7 @@ public sealed partial class RabbitMqConsumerWorker(
             rabbitOptions.Value.Exchange,
             queue,
             registry.Registrations.Select(registration => registration.RoutingKey),
-            consumerOptions.Value.RetryDelays,
+            consumerOptions.Value.EffectiveRetryDelays,
             stoppingToken);
         await channel.BasicQosAsync(0, consumerOptions.Value.PrefetchCount, global: false, stoppingToken);
 
@@ -167,7 +167,7 @@ public sealed partial class RabbitMqConsumerWorker(
 
     private async Task RetryAsync(IChannel channel, string queue, BasicDeliverEventArgs delivery, int attempt, Exception exception, CancellationToken cancellationToken)
     {
-        var delays = consumerOptions.Value.RetryDelays;
+        var delays = consumerOptions.Value.EffectiveRetryDelays;
         var tier = Math.Min(attempt, delays.Count) - 1;
         var properties = CopyProperties(delivery.BasicProperties, attempt + 1, reason: null);
         await channel.BasicPublishAsync(string.Empty, RabbitMqTopology.RetryQueue(queue, tier), mandatory: false, properties, delivery.Body, cancellationToken);

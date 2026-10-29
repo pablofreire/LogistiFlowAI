@@ -2,7 +2,7 @@ namespace LogistiFlow.BuildingBlocks.Web.Security;
 
 /// <summary>
 /// Permission-oriented policies. Endpoints depend on a policy, never on a role name, so the role-to-permission
-/// mapping lives in one place (<see cref="Configuration.AuthorizationServiceCollectionExtensions"/>).
+/// mapping lives in one place (<see cref="Configuration.JwtAuthenticationServiceCollectionExtensions"/>).
 /// </summary>
 public static class AuthorizationPolicies
 {

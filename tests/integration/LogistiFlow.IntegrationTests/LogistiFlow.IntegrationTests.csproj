@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.RabbitMq" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Services/Orders/LogistiFlow.Orders.Api/LogistiFlow.Orders.Api.csproj" />
+    <ProjectReference Include="../../../src/Services/Inventory/LogistiFlow.Inventory.Api/LogistiFlow.Inventory.Api.csproj" />
+    <ProjectReference Include="../../../src/Services/Fulfillment/LogistiFlow.Fulfillment.Api/LogistiFlow.Fulfillment.Api.csproj" />
+  </ItemGroup>
+
+</Project>

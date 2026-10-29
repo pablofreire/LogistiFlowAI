@@ -29,4 +29,16 @@
     <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Infrastructure/LogistiFlow.Fulfillment.Infrastructure.csproj" />
     <Project Path="src/Services/Fulfillment/LogistiFlow.Fulfillment.Api/LogistiFlow.Fulfillment.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/unit/">
+    <Project Path="tests/unit/LogistiFlow.Orders.UnitTests/LogistiFlow.Orders.UnitTests.csproj" />
+    <Project Path="tests/unit/LogistiFlow.Inventory.UnitTests/LogistiFlow.Inventory.UnitTests.csproj" />
+    <Project Path="tests/unit/LogistiFlow.Fulfillment.UnitTests/LogistiFlow.Fulfillment.UnitTests.csproj" />
+    <Project Path="tests/unit/LogistiFlow.BuildingBlocks.UnitTests/LogistiFlow.BuildingBlocks.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/architecture/">
+    <Project Path="tests/architecture/LogistiFlow.ArchitectureTests/LogistiFlow.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/integration/">
+    <Project Path="tests/integration/LogistiFlow.IntegrationTests/LogistiFlow.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

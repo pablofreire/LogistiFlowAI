@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace LogistiFlow.BuildingBlocks.Web.Configuration;
 
-public static class AuthorizationServiceCollectionExtensions
+public static class JwtAuthenticationServiceCollectionExtensions
 {
     public const string RoleClaimType = "role";
     public const string NameClaimType = "name";
