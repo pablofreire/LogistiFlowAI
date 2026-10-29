@@ -1,0 +1,31 @@
+name: Performance (manual)
+
+# Load tests never run on push: they are started by hand against an isolated stack on the runner.
+on:
+  workflow_dispatch:
+    inputs:
+      vus:
+        description: Virtual users
+        default: '10'
+      duration:
+        description: Duration (k6 syntax)
+        default: '1m'
+
+permissions:
+  contents: read
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker compose --profile app up -d --build --wait
+      - name: k6 baseline
+        run: |
+          docker run --rm --network host -e BASE_URL=http://localhost:8089 -e VUS=${{ inputs.vus }} -e DURATION=${{ inputs.duration }} \
+            -v "$PWD/tests/performance/k6:/scripts" grafana/k6:1.3.0 run --summary-export /scripts/results/summary.json /scripts/baseline.js
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: k6-summary
+          path: tests/performance/k6/results/summary.json
