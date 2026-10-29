@@ -521,9 +521,9 @@ export interface components {
             quantity: number;
         };
         /** @enum {unknown} */
-        ReservationStatus: "Reserved" | "Released" | "Failed" | "Cancelled";
+        ReservationStatus: "Reserved" | "Released" | "Failed" | "Cancelled" | "Consumed";
         /** @enum {unknown} */
-        StockMovementType: "Receipt" | "Reservation" | "Release";
+        StockMovementType: "Receipt" | "Reservation" | "Release" | "Shipment";
         StockPositionItem: {
             /** Format: uuid */
             id: string;

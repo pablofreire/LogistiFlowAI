@@ -509,7 +509,7 @@
           "success": {
             "type": "boolean"
           },
-          "data": { },
+          "data": {},
           "error": {
             "oneOf": [
               {
@@ -1045,14 +1045,16 @@
           "Reserved",
           "Released",
           "Failed",
-          "Cancelled"
+          "Cancelled",
+          "Consumed"
         ]
       },
       "StockMovementType": {
         "enum": [
           "Receipt",
           "Reservation",
-          "Release"
+          "Release",
+          "Shipment"
         ]
       },
       "StockPositionItem": {
