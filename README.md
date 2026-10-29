@@ -1,12 +1,12 @@
 # LogistiFlow AI
 
 **Cloud-native logistics and fulfillment platform** — a reference implementation of event-driven .NET microservices
-for an e-commerce fulfillment operator: order intake, multi-warehouse inventory reservation, warehouse fulfillment and
-an operations console. AI agents (an operations copilot and an MCP server) are built on top of this core in later phases.
+for an e-commerce fulfillment operator: order intake, multi-warehouse inventory reservation, warehouse fulfillment,
+carrier shipping with tracking and exceptions, and an operations console. AI agents (an operations copilot and an MCP server) are built on top of this core in later phases.
 
-> Status: **Phase 1 complete** — the first business flow runs end to end in Docker Compose and is covered by unit,
-> architecture, integration (Testcontainers), Playwright and k6 tests. See [STATUS.md](STATUS.md) for what is
-> validated and what is planned.
+> Status: **Phases 1 and 2 complete** — an order runs from intake through reservation, pick, pack and ship to carrier
+> delivery (or return) in Docker Compose, covered by unit, architecture, integration (Testcontainers) and Playwright
+> tests, plus a k6 baseline for intake. See [STATUS.md](STATUS.md) for what is validated and what is planned.
 
 ![Operations dashboard](docs/evidence/e2e/e2e-003-dashboard-updated.png)
 
@@ -21,24 +21,30 @@ part of the system can be deployed, scaled and fail independently.
 ```mermaid
 flowchart LR
     web[React SPA<br/>nginx] -->|/api| gw[Gateway<br/>JWT · YARP · dashboard]
-    gw --> orders[Orders] & inventory[Inventory] & fulfillment[Fulfillment]
+    gw --> orders[Orders] & inventory[Inventory] & fulfillment[Fulfillment] & shipping[Shipping]
     orders <--> mq{{RabbitMQ}}
     inventory <--> mq
     fulfillment <--> mq
+    shipping <--> mq
+    shipping -->|HTTP, idempotent booking,<br/>tracking polls| carrier[Carrier simulator]
     orders --- odb[(orders db)]
     inventory --- idb[(inventory db)]
     fulfillment --- fdb[(fulfillment db)]
+    shipping --- sdb[(shipping db)]
 ```
 
 | Component | Responsibility |
 |---|---|
 | **Orders** | Idempotent order intake, order state machine, history timeline |
 | **Inventory** | Products, warehouses, stock positions, all-or-nothing single-warehouse reservations, stock ledger |
-| **Fulfillment** | One fulfillment job per reserved order, execution history, cancellation compensation |
+| **Fulfillment** | One job per reserved order; pick, pack, ship, report issue and reprocess; execution history |
+| **Shipping** | Shipments, carrier assignment, estimates, tracking, delays and operational exceptions |
+| **Carrier simulator** | Stand-in for carrier APIs with deterministic scenarios (delay, 503, timeout, redelivery, return) |
 | **Gateway** | Identity and JWT issuance, rate-limited login, YARP routing, resilient dashboard aggregation |
-| **Web** | React + TypeScript operations console (dashboard, orders, order timeline, inventory) |
+| **Web** | React + TypeScript console: dashboard, orders, fulfillment queue, shipments, exceptions, inventory |
 
-More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](docs/specifications/phase-1-order-to-fulfillment.md) · [ADRs](docs/decisions).
+More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](docs/specifications/phase-1-order-to-fulfillment.md) ·
+[Phase 2 spec](docs/specifications/phase-2-fulfillment-to-delivery.md) · [ADRs](docs/decisions).
 
 ### Engineering highlights
 
@@ -48,9 +54,15 @@ More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](d
   ([ADR-0005](docs/decisions/ADR-0005-inventory-concurrency.md)).
 - **Out-of-order events** classified as applied, stale (ignored) or early (retried with backoff), then dead-lettered.
 - **Idempotency-Key** on order intake, safe under concurrent duplicates (`INSERT … ON CONFLICT`).
+- **Carrier calls outside message transactions:** a booking worker claims due shipments with `SKIP LOCKED`, retries
+  with durable backoff and sends the shipment id as the carrier's idempotency key, so a timed-out booking is never
+  made twice ([ADR-0006](docs/decisions/ADR-0006-shipping-and-carrier-integration.md)).
+- **Delays and failures as data:** carrier delays, failed attempts, returns and outages open exceptions that delivery
+  or an operator resolves, with KPIs on the dashboard.
 - **Security by default:** every endpoint requires a token unless it opts out; permission policies per role; services
   re-validate the token the gateway issued ([ADR-0004](docs/decisions/ADR-0004-jwt-at-the-gateway.md)).
-- **Architecture as tests:** 29 NetArchTest rules enforce service isolation, layer direction and folder conventions.
+- **Architecture as tests:** 39 NetArchTest rules enforce service isolation (the carrier simulator shares no code),
+  layer direction and folder conventions.
 
 ## Technology
 
@@ -74,11 +86,16 @@ docker compose --profile app up -d --build --wait
 Demo SKUs: `SKU-1001`…`SKU-1008` (stocked), `SKU-OOS-001` (no stock), `SKU-LIMITED-001` (10 units),
 `SKU-BULK-001` (load tests).
 
+Carrier sandbox: the destination city picks the simulated carrier behaviour. `Sandbox Delay`, `Sandbox Unavailable`
+(two 503s), `Sandbox Timeout`, `Sandbox Redelivery` and `Sandbox Address Not Found` (returned to sender); any other
+city is delivered normally. One tracking step every 3 s in compose (`CARRIER_STEP_INTERVAL`).
+
 ### Local development
 
 ```bash
 docker compose up -d --wait postgres rabbitmq                              # infrastructure
-dotnet run --project src/Services/Orders/LogistiFlow.Orders.Api -- --migrate   # same for Inventory (--seed-demo), Fulfillment, Gateway (--seed-demo)
+dotnet run --project src/Services/Orders/LogistiFlow.Orders.Api -- --migrate   # same for Inventory (--seed-demo), Fulfillment, Shipping, Gateway (--seed-demo)
+dotnet run --project src/Simulators/LogistiFlow.CarrierSimulator              # http://localhost:5190, used by Shipping
 dotnet run --project src/Services/Orders/LogistiFlow.Orders.Api --launch-profile http
 cd src/Web/logistiflow-web && npm ci && npm run dev                      # http://localhost:5173
 ```
@@ -87,25 +104,26 @@ cd src/Web/logistiflow-web && npm ci && npm run dev                      # http:
 
 | Suite | Command | Count |
 |---|---|---|
-| Unit | `dotnet test --project tests/unit/<project>` | 170 |
-| Architecture | `dotnet test --project tests/architecture/LogistiFlow.ArchitectureTests` | 29 |
-| Integration (Docker required) | `dotnet test --project tests/integration/LogistiFlow.IntegrationTests` | 25 |
-| E2E (stack running) | `cd tests/e2e && npm ci && npx playwright test` | 10 |
+| Unit | `dotnet test --project tests/unit/<project>` | 221 |
+| Architecture | `dotnet test --project tests/architecture/LogistiFlow.ArchitectureTests` | 39 |
+| Integration (Docker required) | `dotnet test --project tests/integration/LogistiFlow.IntegrationTests` | 43 |
+| E2E (stack running) | `cd tests/e2e && npm ci && npx playwright test` | 14 |
 | Load | see [docs/performance](docs/performance/README.md) | baseline |
 
 ### Performance baseline (laptop, single instances)
 
 Through the gateway, 10 VUs for 1 minute: **1,007 req/s, 0 % errors, p95 26.6 ms**; order intake **539 orders/s**
 (p95 15.6 ms). End-to-end processing drained at **~154 orders/s**, limited by the sequential Orders consumer — the
-measured bottleneck is documented in [the baseline report](docs/performance/baseline-2026-10-29.md).
+measured bottleneck is documented in [the baseline report](docs/performance/baseline-2026-10-29.md). The baseline
+predates Phase 2; shipping and carrier tracking have not been load tested yet.
 
 ## Roadmap
 
 | Phase | Scope | Status |
 |---|---|---|
 | 0–1 | Foundation, Orders, Inventory, Fulfillment, Gateway, web console, tests, compose, CI | Done |
-| 2 | Shipping service and deterministic carrier simulator, pick/pack/ship, tracking, exceptions | Planned |
-| 3 | Fulfillment, shipments and exceptions pages; remaining E2E scenarios | Planned |
+| 2 | Shipping service and deterministic carrier simulator, pick/pack/ship, tracking, exceptions, and the fulfillment, shipments and exceptions pages (moved up from Phase 3) | Done |
+| 3 | "Average processing time" KPI, responsive checks for the new pages, UI polish | Planned |
 | 4 | AI Operations Copilot (Microsoft Agent Framework, read-only tools, deterministic demo provider) | Planned |
 | 5 | Custom MCP server and Claude Code skills | Planned |
 | 6 | Observability stack, consumer concurrency, full k6 suite | Planned |

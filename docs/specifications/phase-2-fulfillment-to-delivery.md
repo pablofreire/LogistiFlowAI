@@ -1,7 +1,7 @@
 # Spec — Phase 2: Pick, Pack, Ship → Carrier Tracking → Delivery and Exceptions
 
-Status: in progress. This document is the plan for Phase 2; the "Verified by" column names the test that will prove
-each criterion, and `STATUS.md` records which of them have actually run.
+Status: implemented on 2026-10-29. Every criterion below is covered by the named tests, which ran green locally
+(see `STATUS.md`); GitHub Actions has not run them yet.
 
 ## Objective
 Take a reserved order through the warehouse floor (pick, pack, ship), hand it to a simulated carrier, follow it
@@ -82,23 +82,23 @@ other city gets the normal scenario. Time is compressed: one tracking step every
 | `Sandbox Unavailable` | Temporary failure: the first 2 booking calls return 503 | `CarrierUnavailable` exception opened, booking retried, exception resolved |
 | `Sandbox Timeout` | Timeout: the first booking call answers after the client timeout, but the booking is created | Retried with the same `Idempotency-Key`; exactly one carrier booking |
 | `Sandbox Redelivery` | First delivery attempt fails (recipient unavailable), second attempt delivers | `DeliveryAttemptFailed` exception, resolved on delivery |
-| `Sandbox Address Not Found` | "Delivery not located": every attempt fails because the address cannot be located; returned to sender | Shipment `ReturnedToSender`, `AddressNotLocated` exception open, order `Failed` |
+| `Sandbox Address Not Found` | "Delivery not located": every attempt fails because the address cannot be located; returned to sender | Shipment `ReturnedToSender`, `ReturnedToSender` exception open (reason: address not located), order `Failed` |
 
 ## Requirements and acceptance criteria
 
 | Id | Acceptance criterion | Verified by |
 |---|---|---|
 | AC-17 | Pack moves a `Picking` job to `Packed` and the order to `Packed`; ship moves it to `Shipped` and the order to `Shipped` | `FulfillmentActionsTests`, E2E-005 |
-| AC-18 | Invalid floor actions return 409 (for example, ship before pack); viewers get 403 | `FulfillmentActionsTests`, `FulfillmentJobEntityTests` |
-| AC-19 | A failed job can be reprocessed (`Failed` → `Picking`), and every change is in the job history | `FulfillmentActionsTests`, `FulfillmentJobEntityTests` |
+| AC-18 | Invalid floor actions return 409 (for example, ship before pack); viewers get 403 | `FulfillmentActionsTests`, `FulfillmentJobActionTests`, `PerformFulfillmentJobActionUseCaseTests` |
+| AC-19 | A failed job can be reprocessed (`Failed` → `Picking`), and every change is in the job history | `FulfillmentActionsTests`, `FulfillmentJobActionTests` |
 | AC-20 | Shipping consumes the reservation exactly once: `on_hand` and `reserved` drop by the shipped quantity, with a `Shipment` ledger row | `ShipmentFlowTests.ShippedOrder_ConsumesReservedStockOnce` |
 | AC-21 | A shipped order gets one shipment with a carrier chosen by the rules above, a tracking number and an estimate | `ShipmentFlowTests`, `CarrierSelectionPolicyTests` |
-| AC-22 | Tracking events move the shipment and the order to `Delivered`; a repeated poll adds no duplicate events | `ShipmentFlowTests.NormalScenario_*`, `ShipmentEntityTests`, E2E-006 |
+| AC-22 | Tracking events move the shipment and the order to `Delivered`; a repeated poll adds no duplicate events | `ShipmentFlowTests.NormalScenario_*`, `ShipmentEntityTests`, `PollShipmentTrackingUseCaseTests`, E2E-006 |
 | AC-23 | A carrier delay opens a `Delay` exception and counts as a delayed shipment until delivery | `CarrierScenarioTests.Delay_*`, E2E-007 |
-| AC-24 | Carrier 503s and timeouts are retried with backoff; the timeout case books exactly once | `CarrierScenarioTests.TemporaryFailure_*`, `CarrierScenarioTests.Timeout_*` |
+| AC-24 | Carrier 503s and timeouts are retried with backoff; the timeout case books exactly once | `CarrierScenarioTests.TemporaryFailure_*`, `CarrierScenarioTests.Timeout_*`, `BookShipmentUseCaseTests` |
 | AC-25 | A failed attempt followed by redelivery ends `Delivered`; an unlocatable address ends `ReturnedToSender` and the order `Failed` | `CarrierScenarioTests.Redelivery_*`, `CarrierScenarioTests.AddressNotFound_*` |
 | AC-26 | An ops manager can resolve an open exception and retry a failed booking; other roles get 403 | `ShippingApiTests` |
-| AC-27 | The dashboard shows shipments by status, delayed shipments and open exceptions, and degrades when Shipping is down | `ShipmentFlowTests.Metrics_*`, E2E-006, E2E-007 |
+| AC-27 | The dashboard shows shipments by status, delayed shipments and open exceptions, and degrades when Shipping is down | `ShipmentFlowTests.Metrics_*`, E2E-006, E2E-007, compose smoke with `shipping-api` stopped (2026-10-29) |
 | AC-28 | `/health/ready` stays unhealthy until the consumer topology is declared | `ConsumerReadinessTests` |
 
 ## Error scenarios
