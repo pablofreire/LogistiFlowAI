@@ -100,19 +100,38 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # args feeds build-args, which is a newline-separated list.
         include:
           - image: orders-api
             dockerfile: deploy/docker/dotnet.Dockerfile
-            args: PROJECT=src/Services/Orders/LogistiFlow.Orders.Api ASSEMBLY=LogistiFlow.Orders.Api.dll
+            args: |
+              PROJECT=src/Services/Orders/LogistiFlow.Orders.Api
+              ASSEMBLY=LogistiFlow.Orders.Api.dll
           - image: inventory-api
             dockerfile: deploy/docker/dotnet.Dockerfile
-            args: PROJECT=src/Services/Inventory/LogistiFlow.Inventory.Api ASSEMBLY=LogistiFlow.Inventory.Api.dll
+            args: |
+              PROJECT=src/Services/Inventory/LogistiFlow.Inventory.Api
+              ASSEMBLY=LogistiFlow.Inventory.Api.dll
           - image: fulfillment-api
             dockerfile: deploy/docker/dotnet.Dockerfile
-            args: PROJECT=src/Services/Fulfillment/LogistiFlow.Fulfillment.Api ASSEMBLY=LogistiFlow.Fulfillment.Api.dll
+            args: |
+              PROJECT=src/Services/Fulfillment/LogistiFlow.Fulfillment.Api
+              ASSEMBLY=LogistiFlow.Fulfillment.Api.dll
+          - image: shipping-api
+            dockerfile: deploy/docker/dotnet.Dockerfile
+            args: |
+              PROJECT=src/Services/Shipping/LogistiFlow.Shipping.Api
+              ASSEMBLY=LogistiFlow.Shipping.Api.dll
+          - image: carrier-simulator
+            dockerfile: deploy/docker/dotnet.Dockerfile
+            args: |
+              PROJECT=src/Simulators/LogistiFlow.CarrierSimulator
+              ASSEMBLY=LogistiFlow.CarrierSimulator.dll
           - image: gateway
             dockerfile: deploy/docker/dotnet.Dockerfile
-            args: PROJECT=src/Gateway/LogistiFlow.Gateway ASSEMBLY=LogistiFlow.Gateway.dll
+            args: |
+              PROJECT=src/Gateway/LogistiFlow.Gateway
+              ASSEMBLY=LogistiFlow.Gateway.dll
           - image: web
             dockerfile: deploy/docker/web.Dockerfile
             args: ''

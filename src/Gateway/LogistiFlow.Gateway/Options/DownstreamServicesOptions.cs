@@ -10,4 +10,6 @@ public sealed class DownstreamServicesOptions
     public Uri Inventory { get; set; } = new("http://localhost:5102");
 
     public Uri Fulfillment { get; set; } = new("http://localhost:5103");
+
+    public Uri Shipping { get; set; } = new("http://localhost:5104");
 }

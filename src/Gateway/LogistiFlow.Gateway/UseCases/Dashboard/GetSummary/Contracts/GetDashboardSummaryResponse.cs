@@ -10,5 +10,6 @@ public sealed record GetDashboardSummaryResponse(
     JsonElement? Orders,
     JsonElement? Inventory,
     JsonElement? Fulfillment,
+    JsonElement? Shipping,
     IReadOnlyList<string> UnavailableSources,
     DateTimeOffset GeneratedAt);

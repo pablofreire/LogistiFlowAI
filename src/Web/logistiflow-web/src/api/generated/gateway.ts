@@ -183,6 +183,7 @@ export interface components {
             orders: null | components["schemas"]["JsonElement"];
             inventory: null | components["schemas"]["JsonElement"];
             fulfillment: null | components["schemas"]["JsonElement"];
+            shipping: null | components["schemas"]["JsonElement"];
             unavailableSources: string[];
             /** Format: date-time */
             generatedAt: string;

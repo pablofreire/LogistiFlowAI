@@ -30,5 +30,10 @@ and publishing to a broker cannot be one transaction; dual writes lose or invent
   declared its queue is dropped. This happened once in local development (an order stuck in `PendingInventory`
   because Inventory had not started yet). Mitigation for real deployments: declare the topology as infrastructure
   before services start (Phase 7), or publish with `mandatory=true` to an alternate exchange.
+- Follow-up (Phase 2): `/health/ready` of a consuming service stays unhealthy until its queues are declared and bound
+  (`ConsumerReadinessHealthCheck`, proven by `ConsumerReadinessTests`). Container health checks and
+  `docker compose --wait` use readiness, so on a fresh start no traffic reaches the system before every queue
+  exists. A consumer added to a system that is already running still starts from "now": events published before
+  its first start are not replayed automatically and need a manual backfill.
 - Throughput is bounded by sequential consumers; see `docs/performance/baseline-2026-10-29.md`.
 - Azure Service Bus is the managed alternative for Azure (Phase 7 ADR); the outbox/inbox design does not change.

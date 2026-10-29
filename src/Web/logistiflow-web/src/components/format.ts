@@ -1,5 +1,11 @@
 const dateTime = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 const number = new Intl.NumberFormat('en-US');
+const calendarDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+
+/** A calendar date from the API ("2026-11-04"), shown without any time-zone shift. */
+export function formatDate(value: string | null | undefined): string {
+  return value ? calendarDate.format(new Date(`${value}T00:00:00Z`)) : '—';
+}
 
 export function formatDateTime(value: string | null | undefined): string {
   return value ? dateTime.format(new Date(value)) : '—';

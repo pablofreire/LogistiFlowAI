@@ -272,7 +272,7 @@
           "success": {
             "type": "boolean"
           },
-          "data": { },
+          "data": {},
           "error": {
             "oneOf": [
               {
@@ -321,6 +321,7 @@
           "orders",
           "inventory",
           "fulfillment",
+          "shipping",
           "unavailableSources",
           "generatedAt"
         ],
@@ -356,6 +357,16 @@
               }
             ]
           },
+          "shipping": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
           "unavailableSources": {
             "type": "array",
             "items": {
@@ -368,7 +379,7 @@
           }
         }
       },
-      "JsonElement": { },
+      "JsonElement": {},
       "LoginBody": {
         "required": [
           "email",

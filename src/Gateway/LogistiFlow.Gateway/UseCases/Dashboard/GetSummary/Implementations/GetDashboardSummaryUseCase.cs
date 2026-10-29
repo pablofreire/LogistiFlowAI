@@ -10,30 +10,30 @@ public sealed class GetDashboardSummaryUseCase(IServiceMetricsClient metrics, Ti
     public const string OrdersService = "orders";
     public const string InventoryService = "inventory";
     public const string FulfillmentService = "fulfillment";
+    public const string ShippingService = "shipping";
 
     public async Task<Result<GetDashboardSummaryResponse>> ExecuteAsync(GetDashboardSummaryRequest request, CancellationToken cancellationToken)
     {
-        var orders = metrics.GetAsync(OrdersService, "/api/metrics/orders", request.Authorization, request.CorrelationId, cancellationToken);
-        var inventory = metrics.GetAsync(InventoryService, "/api/metrics/inventory", request.Authorization, request.CorrelationId, cancellationToken);
-        var fulfillment = metrics.GetAsync(FulfillmentService, "/api/metrics/fulfillment", request.Authorization, request.CorrelationId, cancellationToken);
-        await Task.WhenAll(orders, inventory, fulfillment);
+        var orders = Fetch(OrdersService, request, cancellationToken);
+        var inventory = Fetch(InventoryService, request, cancellationToken);
+        var fulfillment = Fetch(FulfillmentService, request, cancellationToken);
+        var shipping = Fetch(ShippingService, request, cancellationToken);
+        await Task.WhenAll(orders, inventory, fulfillment, shipping);
 
-        var unavailable = new List<string>();
-        if (orders.Result is null)
-        {
-            unavailable.Add(OrdersService);
-        }
+        var unavailable = new[] { (OrdersService, orders), (InventoryService, inventory), (FulfillmentService, fulfillment), (ShippingService, shipping) }
+            .Where(source => source.Item2.Result is null)
+            .Select(source => source.Item1)
+            .ToList();
 
-        if (inventory.Result is null)
-        {
-            unavailable.Add(InventoryService);
-        }
-
-        if (fulfillment.Result is null)
-        {
-            unavailable.Add(FulfillmentService);
-        }
-
-        return new GetDashboardSummaryResponse(orders.Result, inventory.Result, fulfillment.Result, unavailable, timeProvider.GetUtcNow());
+        return new GetDashboardSummaryResponse(
+            orders.Result,
+            inventory.Result,
+            fulfillment.Result,
+            shipping.Result,
+            unavailable,
+            timeProvider.GetUtcNow());
     }
+
+    private Task<System.Text.Json.JsonElement?> Fetch(string service, GetDashboardSummaryRequest request, CancellationToken cancellationToken) =>
+        metrics.GetAsync(service, $"/api/metrics/{service}", request.Authorization, request.CorrelationId, cancellationToken);
 }

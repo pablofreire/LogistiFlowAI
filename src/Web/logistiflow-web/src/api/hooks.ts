@@ -3,13 +3,23 @@ import { request, toQueryString } from './client';
 import type {
   CreateOrderBody,
   DashboardSummary,
+  FulfillmentActionResult,
   FulfillmentJobDetails,
+  FulfillmentJobsPage,
+  FulfillmentJobStatus,
   LoginResponse,
   OrderDetails,
   OrderStatus,
   OrderStatusChangeItem,
   OrdersPage,
   ReservationDetails,
+  ShipmentActionOutcome,
+  ShipmentDetails,
+  ShipmentExceptionsPage,
+  ShipmentExceptionStatus,
+  ShipmentExceptionType,
+  ShipmentsPage,
+  ShipmentStatus,
   StockPage,
   WarehouseItem,
 } from './types';
@@ -23,7 +33,37 @@ const keys = {
   job: (id: string) => ['order', id, 'fulfillment'] as const,
   stock: (filters: StockFilters) => ['stock', filters] as const,
   warehouses: ['warehouses'] as const,
+  jobs: (filters: JobFilters) => ['fulfillment-jobs', filters] as const,
+  shipments: (filters: ShipmentFilters) => ['shipments', filters] as const,
+  shipment: (id: string) => ['shipment', id] as const,
+  shipmentByOrder: (orderId: string) => ['order', orderId, 'shipment'] as const,
+  exceptions: (filters: ExceptionFilters) => ['shipment-exceptions', filters] as const,
 };
+
+export interface JobFilters {
+  page: number;
+  pageSize: number;
+  status: FulfillmentJobStatus | null;
+}
+
+export interface ShipmentFilters {
+  page: number;
+  pageSize: number;
+  status: ShipmentStatus | null;
+  delayedOnly: boolean;
+}
+
+export interface ExceptionFilters {
+  page: number;
+  pageSize: number;
+  status: ShipmentExceptionStatus | null;
+  type: ShipmentExceptionType | null;
+}
+
+export type FloorAction = 'pack' | 'ship' | 'report-issue' | 'reprocess';
+
+/** Shipments move on their own as the carrier reports; screens that show them refresh on this cadence. */
+const trackingRefreshMs = 2_000;
 
 export interface OrderFilters {
   page: number;
@@ -40,7 +80,8 @@ export interface StockFilters {
   lowStockOnly: boolean;
 }
 
-const inFlightStatuses: OrderStatus[] = ['Created', 'PendingInventory', 'Reserved'];
+// Statuses that change on their own as events arrive from other services.
+const inFlightStatuses: OrderStatus[] = ['Created', 'PendingInventory', 'Reserved', 'Picking', 'Packed', 'Shipped'];
 
 export function login(email: string, password: string) {
   return request<LoginResponse>('/api/auth/login', { method: 'POST', body: { email, password } });
@@ -132,5 +173,84 @@ export function useWarehouses() {
     queryKey: keys.warehouses,
     queryFn: async ({ signal }) => (await request<WarehouseItem[]>('/api/inventory/warehouses', { signal })).data,
     staleTime: 60_000,
+  });
+}
+
+export function useFulfillmentJobs(filters: JobFilters) {
+  return useQuery({
+    queryKey: keys.jobs(filters),
+    queryFn: async ({ signal }) => (await request<FulfillmentJobsPage>(`/api/fulfillment/jobs${toQueryString({ ...filters })}`, { signal })).data,
+    placeholderData: keepPreviousData,
+    refetchInterval: 5_000,
+  });
+}
+
+export function useFloorAction() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ jobId, action, reason }: { jobId: string; action: FloorAction; reason?: string }) =>
+      (
+        await request<FulfillmentActionResult>(`/api/fulfillment/jobs/${jobId}/${action}`, {
+          method: 'POST',
+          body: action === 'report-issue' ? { reason } : undefined,
+        })
+      ).data,
+    onSuccess: () => Promise.all([client.invalidateQueries({ queryKey: ['fulfillment-jobs'] }), client.invalidateQueries({ queryKey: ['order'] })]),
+  });
+}
+
+export function useShipments(filters: ShipmentFilters) {
+  return useQuery({
+    queryKey: keys.shipments(filters),
+    queryFn: async ({ signal }) =>
+      (await request<ShipmentsPage>(`/api/shipping/shipments${toQueryString({ ...filters, delayedOnly: filters.delayedOnly || null })}`, { signal })).data,
+    placeholderData: keepPreviousData,
+    refetchInterval: trackingRefreshMs,
+  });
+}
+
+export function useShipment(shipmentId: string) {
+  return useQuery({
+    queryKey: keys.shipment(shipmentId),
+    queryFn: async ({ signal }) => (await request<ShipmentDetails>(`/api/shipping/shipments/${shipmentId}`, { signal })).data,
+    refetchInterval: trackingRefreshMs,
+  });
+}
+
+/** The order's shipment once it has shipped; the carrier keeps updating it, so it refreshes while undelivered. */
+export function useShipmentByOrder(orderId: string, status: OrderStatus | undefined) {
+  return useQuery({
+    queryKey: keys.shipmentByOrder(orderId),
+    queryFn: async ({ signal }) => (await request<ShipmentDetails>(`/api/shipping/shipments/by-order/${orderId}`, { signal })).data,
+    enabled: status === 'Shipped' || status === 'Delivered' || status === 'Failed',
+    retry: false,
+    refetchInterval: status === 'Shipped' ? trackingRefreshMs : false,
+  });
+}
+
+export function useShipmentExceptions(filters: ExceptionFilters) {
+  return useQuery({
+    queryKey: keys.exceptions(filters),
+    queryFn: async ({ signal }) => (await request<ShipmentExceptionsPage>(`/api/shipping/exceptions${toQueryString({ ...filters })}`, { signal })).data,
+    placeholderData: keepPreviousData,
+    refetchInterval: 5_000,
+  });
+}
+
+export function useResolveException() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ exceptionId, resolution }: { exceptionId: string; resolution: string }) =>
+      (await request<ShipmentActionOutcome>(`/api/shipping/exceptions/${exceptionId}/resolve`, { method: 'POST', body: { resolution } })).data,
+    onSuccess: () =>
+      Promise.all([client.invalidateQueries({ queryKey: ['shipment-exceptions'] }), client.invalidateQueries({ queryKey: ['shipment'] })]),
+  });
+}
+
+export function useRetryBooking(shipmentId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async () => (await request<ShipmentActionOutcome>(`/api/shipping/shipments/${shipmentId}/retry-booking`, { method: 'POST' })).data,
+    onSuccess: () => client.invalidateQueries({ queryKey: keys.shipment(shipmentId) }),
   });
 }

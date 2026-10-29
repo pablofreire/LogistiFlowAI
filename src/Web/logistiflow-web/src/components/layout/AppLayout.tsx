@@ -1,12 +1,25 @@
 import { ActionIcon, AppShell, Avatar, Burger, Group, NavLink, Stack, Text, Tooltip, useMantineColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconBuildingWarehouse, IconLayoutDashboard, IconLogout, IconMoon, IconPackage, IconSun } from '@tabler/icons-react';
+import {
+  IconAlertOctagon,
+  IconBuildingWarehouse,
+  IconForklift,
+  IconLayoutDashboard,
+  IconLogout,
+  IconMoon,
+  IconPackage,
+  IconSun,
+  IconTruck,
+} from '@tabler/icons-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/useAuth';
 
 const navigation = [
   { to: '/', label: 'Dashboard', icon: IconLayoutDashboard, testId: 'nav-dashboard' },
   { to: '/orders', label: 'Orders', icon: IconPackage, testId: 'nav-orders' },
+  { to: '/fulfillment', label: 'Fulfillment', icon: IconForklift, testId: 'nav-fulfillment' },
+  { to: '/shipments', label: 'Shipments', icon: IconTruck, testId: 'nav-shipments' },
+  { to: '/exceptions', label: 'Exceptions', icon: IconAlertOctagon, testId: 'nav-exceptions' },
   { to: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse, testId: 'nav-inventory' },
 ];
 

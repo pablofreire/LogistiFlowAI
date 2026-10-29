@@ -1,5 +1,15 @@
 import { Alert, Card, Group, Progress, SimpleGrid, Stack, Table, Text, Title } from '@mantine/core';
-import { IconAlertTriangle, IconBox, IconClockHour4, IconPackage, IconTruckDelivery } from '@tabler/icons-react';
+import {
+  IconAlertOctagon,
+  IconAlertTriangle,
+  IconBox,
+  IconCircleCheck,
+  IconClockExclamation,
+  IconClockHour4,
+  IconPackage,
+  IconTruck,
+  IconTruckDelivery,
+} from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { useDashboard } from '../api/hooks';
 import { orderStatuses } from '../api/types';
@@ -19,7 +29,7 @@ export function DashboardPage() {
     return <ErrorState error={error} title="Dashboard unavailable" />;
   }
 
-  const { orders, inventory, fulfillment } = data;
+  const { orders, inventory, fulfillment, shipping } = data;
   const byStatus = orders?.byStatus ?? {};
   const totalOrders = orders?.totalOrders ?? 0;
   const failed = byStatus.Failed ?? 0;
@@ -32,7 +42,7 @@ export function DashboardPage() {
             Operations dashboard
           </Title>
           <Text c="dimmed" size="sm">
-            Live from the Orders, Inventory and Fulfillment services · updated {formatDateTime(data.generatedAt)}
+            Live from the Orders, Inventory, Fulfillment and Shipping services · updated {formatDateTime(data.generatedAt)}
           </Text>
         </div>
       </Group>
@@ -48,6 +58,13 @@ export function DashboardPage() {
         <KpiCard testId="kpi-fulfillment-jobs" label="Fulfillment jobs" value={formatNumber(fulfillment?.totalJobs)} hint={`${formatNumber(fulfillment?.byStatus.Picking)} picking now`} icon={<IconTruckDelivery size={22} />} />
         <KpiCard testId="kpi-reserved-units" label="Reserved units" value={formatNumber(inventory?.totalReserved)} hint={`${formatNumber(inventory?.totalAvailable)} available`} icon={<IconBox size={22} />} />
         <KpiCard testId="kpi-time-to-picking" label="Avg. time to picking" value={formatDuration(orders?.averageSecondsToPicking)} hint={`${formatNumber(failed)} orders failed`} icon={<IconClockHour4 size={22} />} />
+      </SimpleGrid>
+
+      <SimpleGrid cols={{ base: 1, xs: 2, lg: 4 }}>
+        <KpiCard testId="kpi-in-transit" label="With carriers" value={formatNumber(shipping?.inTransit)} hint={`${formatNumber(shipping?.totalShipments)} shipments in total`} icon={<IconTruck size={22} />} />
+        <KpiCard testId="kpi-delivered" label="Delivered" value={formatNumber(shipping?.delivered)} hint={`${formatNumber(shipping?.byStatus.ReturnedToSender)} returned to sender`} icon={<IconCircleCheck size={22} />} />
+        <KpiCard testId="kpi-delayed-shipments" label="Delayed shipments" value={formatNumber(shipping?.delayedShipments)} hint="Undelivered, with an open delay" icon={<IconClockExclamation size={22} />} />
+        <KpiCard testId="kpi-open-exceptions" label="Open exceptions" value={formatNumber(shipping?.openExceptions)} hint={`${formatNumber(shipping?.openExceptionsByType.CarrierUnavailable)} carrier outages`} icon={<IconAlertOctagon size={22} />} />
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, md: 2 }}>

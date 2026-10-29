@@ -44,6 +44,7 @@ public static class GatewayServiceCollectionExtensions
         AddMetricsClient(services, GetDashboardSummaryUseCase.OrdersService, downstream.Orders);
         AddMetricsClient(services, GetDashboardSummaryUseCase.InventoryService, downstream.Inventory);
         AddMetricsClient(services, GetDashboardSummaryUseCase.FulfillmentService, downstream.Fulfillment);
+        AddMetricsClient(services, GetDashboardSummaryUseCase.ShippingService, downstream.Shipping);
 
         var (routes, clusters) = ProxyConfiguration.Build(downstream);
         services.AddReverseProxy().LoadFromMemory(routes, clusters);

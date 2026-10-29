@@ -4,9 +4,10 @@ import { IconAlertTriangle, IconArrowLeft, IconCircleCheck } from '@tabler/icons
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError } from '../api/envelope';
-import { useCancelOrder, useFulfillmentJob, useOrder, useOrderHistory, useReservation } from '../api/hooks';
+import { useCancelOrder, useFulfillmentJob, useOrder, useOrderHistory, useReservation, useShipmentByOrder } from '../api/hooks';
 import { useAuth } from '../auth/useAuth';
-import { formatDateTime, formatSource } from '../components/format';
+import { FloorActions } from '../components/FloorActions';
+import { formatDate, formatDateTime, formatSource } from '../components/format';
 import { ErrorState, LoadingState } from '../components/states/QueryState';
 import { StatusBadge } from '../components/StatusBadge';
 
@@ -20,6 +21,7 @@ export function OrderDetailsPage() {
   const history = useOrderHistory(orderId, status);
   const reservation = useReservation(orderId, status);
   const job = useFulfillmentJob(orderId, status);
+  const shipment = useShipmentByOrder(orderId, status);
 
   if (order.isPending) {
     return <LoadingState label="Loading order…" />;
@@ -121,9 +123,40 @@ export function OrderDetailsPage() {
                 {job.data ? <StatusBadge status={job.data.status} /> : <Text size="sm">Not started</Text>}
               </span>
             </Group>
+            {job.data && (
+              <Group justify="flex-end">
+                <FloorActions jobId={job.data.id} status={job.data.status} size="sm" />
+              </Group>
+            )}
           </Stack>
         </Card>
       </SimpleGrid>
+
+      {shipment.data && (
+        <Card data-testid="order-shipment">
+          <Group justify="space-between" mb="sm">
+            <Title order={2} fz="md">
+              Shipment
+            </Title>
+            <Anchor component={Link} to={`/shipments/${shipment.data.id}`} size="sm" data-testid="order-shipment-link">
+              Tracking details
+            </Anchor>
+          </Group>
+          <SimpleGrid cols={{ base: 2, md: 4 }}>
+            <Field label="Carrier" value={shipment.data.carrierName} />
+            <Field label="Tracking number" value={shipment.data.trackingNumber ?? 'Awaiting booking'} testId="order-shipment-tracking" />
+            <Field label="Estimated delivery" value={formatDate(shipment.data.estimatedDelivery)} />
+            <div>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                Status
+              </Text>
+              <span data-testid="order-shipment-status">
+                <StatusBadge status={shipment.data.status} />
+              </span>
+            </div>
+          </SimpleGrid>
+        </Card>
+      )}
 
       <Card>
         <Title order={2} fz="md" mb="md">
@@ -145,6 +178,19 @@ export function OrderDetailsPage() {
         )}
       </Card>
     </Stack>
+  );
+}
+
+function Field({ label, value, testId }: { label: string; value: string; testId?: string }) {
+  return (
+    <div>
+      <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+        {label}
+      </Text>
+      <Text size="sm" fw={600} data-testid={testId}>
+        {value}
+      </Text>
+    </div>
   );
 }
 

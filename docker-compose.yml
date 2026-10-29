@@ -126,6 +126,43 @@ services:
       fulfillment-migrate:
         condition: service_completed_successfully
 
+  shipping-migrate:
+    profiles: ["app"]
+    image: logistiflow/shipping-api:local
+    build: { <<: *dotnet-build, args: { PROJECT: src/Services/Shipping/LogistiFlow.Shipping.Api, ASSEMBLY: LogistiFlow.Shipping.Api.dll } }
+    command: ["--migrate"]
+    environment:
+      <<: *service-env
+      Database__ConnectionString: Host=postgres;Port=5432;Database=logistiflow_shipping;Username=${POSTGRES_USER:-logistiflow};Password=${POSTGRES_PASSWORD:-logistiflow_dev}
+    depends_on: *depends-infra
+    healthcheck: { disable: true }
+
+  shipping-api:
+    profiles: ["app"]
+    image: logistiflow/shipping-api:local
+    environment:
+      <<: *service-env
+      Database__ConnectionString: Host=postgres;Port=5432;Database=logistiflow_shipping;Username=${POSTGRES_USER:-logistiflow};Password=${POSTGRES_PASSWORD:-logistiflow_dev}
+      CarrierApi__BaseAddress: http://carrier-simulator:8080/
+      CarrierApi__Timeout: "00:00:05"
+      ShippingWorkers__TrackingPollInterval: ${TRACKING_POLL_INTERVAL:-00:00:02}
+    depends_on:
+      <<: *depends-infra
+      shipping-migrate:
+        condition: service_completed_successfully
+      carrier-simulator:
+        condition: service_healthy
+
+  # Stands in for the carriers' APIs. Sandbox destination cities select deterministic scenarios (see its README).
+  carrier-simulator:
+    profiles: ["app"]
+    image: logistiflow/carrier-simulator:local
+    build: { <<: *dotnet-build, args: { PROJECT: src/Simulators/LogistiFlow.CarrierSimulator, ASSEMBLY: LogistiFlow.CarrierSimulator.dll } }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Simulator__StepInterval: ${CARRIER_STEP_INTERVAL:-00:00:03}
+      Simulator__TimeoutDelay: "00:00:15"
+
   gateway-migrate:
     profiles: ["app"]
     image: logistiflow/gateway:local
@@ -147,6 +184,7 @@ services:
       Services__Orders: http://orders-api:8080
       Services__Inventory: http://inventory-api:8080
       Services__Fulfillment: http://fulfillment-api:8080
+      Services__Shipping: http://shipping-api:8080
       RateLimiting__Login__PermitLimit: ${LOGIN_RATE_LIMIT:-30}
     ports:
       - "${GATEWAY_PORT:-8089}:8080"
@@ -158,6 +196,8 @@ services:
       inventory-api:
         condition: service_healthy
       fulfillment-api:
+        condition: service_healthy
+      shipping-api:
         condition: service_healthy
 
   web:

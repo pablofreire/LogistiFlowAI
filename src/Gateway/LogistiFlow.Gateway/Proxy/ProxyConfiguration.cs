@@ -24,6 +24,8 @@ public static class ProxyConfiguration
             Route("inventory-metrics", "inventory", "/api/metrics/inventory"),
             Route("fulfillment", "fulfillment", "/api/fulfillment/{**rest}"),
             Route("fulfillment-metrics", "fulfillment", "/api/metrics/fulfillment"),
+            Route("shipping", "shipping", "/api/shipping/{**rest}"),
+            Route("shipping-metrics", "shipping", "/api/metrics/shipping"),
         };
 
         var clusters = new List<ClusterConfig>
@@ -31,6 +33,7 @@ public static class ProxyConfiguration
             Cluster("orders", services.Orders),
             Cluster("inventory", services.Inventory),
             Cluster("fulfillment", services.Fulfillment),
+            Cluster("shipping", services.Shipping),
         };
 
         return (routes, clusters);
