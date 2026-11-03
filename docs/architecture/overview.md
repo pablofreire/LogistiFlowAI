@@ -101,6 +101,20 @@ sequenceDiagram
 The services stay the only authority on what a user may read: a tool sees exactly what the caller could see through
 the console. Without AI configuration the demo provider runs the same loop with fixed rules (ADR-0008).
 
+## MCP server: how a client reads the platform
+
+```
+Claude Code (MCP client) ──stdio──▶ LogistiFlow.McpServer      (child process; stdout = protocol, logs on stderr)
+                                     ├─ validates arguments     (ORD-…, SKU, enum filters, limit)
+                                     ├─ token: LOGISTIFLOW_ACCESS_TOKEN, or sign-in with e-mail/password (cached)
+                                     └─ GET through the gateway ─▶ Orders / Inventory / Fulfillment / Shipping
+                                                                   (the user's role policies apply)
+```
+
+The server is a gateway client like the web console: it shares no code with the services
+(`McpServer_ReferencesNoLogistiFlowAssembly`). Tool failures come back as MCP tool errors with a reason; results are
+structured content that matches each tool's output schema. Decision record: ADR-0009.
+
 ## Integration events (v1)
 
 | Event | Producer | Consumers | Effect |
@@ -128,5 +142,5 @@ LogistiFlow.{Service}.Infrastructure  Persistence/{Migrations,Queries,Rows,Repos
 LogistiFlow.{Service}.Api             Controllers (+ Contracts), Program (composition root)
 ```
 
-Rules are enforced by `tests/architecture` (39 rules: service isolation, layer direction, folder conventions; the
-carrier simulator may not reference any LogistiFlow assembly).
+Rules are enforced by `tests/architecture` (service isolation, layer direction, folder conventions; the carrier
+simulator and the MCP server may not reference any LogistiFlow assembly).

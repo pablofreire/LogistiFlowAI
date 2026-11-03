@@ -3,10 +3,12 @@
 **Cloud-native logistics and fulfillment platform** — a reference implementation of event-driven .NET microservices
 for an e-commerce fulfillment operator: order intake, multi-warehouse inventory reservation, warehouse fulfillment,
 carrier shipping with tracking and exceptions, an operations console, and an AI operations copilot that answers from
-live platform data through read-only tools. An MCP server is built on top of this core in a later phase.
+live platform data through read-only tools, and an MCP server that gives Claude Code (or any MCP client) read-only
+access to the same data.
 
-> Status: **Phases 1 to 4 complete** — an order runs from intake through reservation, pick, pack and ship to carrier
-> delivery (or return) in Docker Compose, and an operations copilot explains it from live data, covered by unit,
+> Status: **Phases 1 to 5 complete** — an order runs from intake through reservation, pick, pack and ship to carrier
+> delivery (or return) in Docker Compose, an operations copilot explains it from live data, and an MCP server exposes
+> it to Claude Code (validated in a recorded session), covered by unit,
 > architecture, integration (Testcontainers) and Playwright tests, plus a k6 baseline for intake. See [STATUS.md](STATUS.md) for what is validated and what is planned.
 
 ![Operations dashboard](docs/evidence/e2e/e2e-003-dashboard-updated.png)
@@ -24,6 +26,8 @@ flowchart LR
     web[React SPA<br/>nginx] -->|/api| gw[Gateway<br/>JWT · YARP · dashboard]
     gw --> orders[Orders] & inventory[Inventory] & fulfillment[Fulfillment] & shipping[Shipping]
     gw --> ai[AiOperations<br/>copilot]
+    mcp[MCP server<br/>stdio, read-only] -->|bearer token| gw
+    client[Claude Code /<br/>MCP client] --> mcp
     ai -->|read-only tools,<br/>caller's token| orders & inventory & fulfillment & shipping
     orders <--> mq{{RabbitMQ}}
     inventory <--> mq
@@ -44,6 +48,7 @@ flowchart LR
 | **Fulfillment** | One job per reserved order; pick, pack, ship, report issue and reprocess; execution history |
 | **Shipping** | Shipments, carrier assignment, estimates, tracking, delays and operational exceptions |
 | **AiOperations** | Operations copilot on Microsoft Agent Framework: nine read-only tools over the services, a deterministic demo provider (labelled as simulated) or an OpenAI-compatible model, audit of every question, tool call, token and cost |
+| **MCP server** | `LogistiFlow.McpServer`: five read-only `logistics_*` tools for MCP clients over stdio, reading through the gateway as a configured user; structured, schema-checked results |
 | **Carrier simulator** | Stand-in for carrier APIs with deterministic scenarios (delay, 503, timeout, redelivery, return) |
 | **Gateway** | Identity and JWT issuance, rate-limited login, YARP routing, resilient dashboard aggregation |
 | **Web** | React + TypeScript console: dashboard, orders, fulfillment queue, shipments, exceptions, inventory, copilot |
@@ -51,7 +56,8 @@ flowchart LR
 More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](docs/specifications/phase-1-order-to-fulfillment.md) ·
 [Phase 2 spec](docs/specifications/phase-2-fulfillment-to-delivery.md) ·
 [Phase 3 spec](docs/specifications/phase-3-processing-time-and-responsive.md) ·
-[Phase 4 spec](docs/specifications/phase-4-ai-operations-copilot.md) · [ADRs](docs/decisions).
+[Phase 4 spec](docs/specifications/phase-4-ai-operations-copilot.md) ·
+[Phase 5 spec](docs/specifications/phase-5-mcp-server-and-skills.md) · [ADRs](docs/decisions).
 
 ### Engineering highlights
 
@@ -68,7 +74,7 @@ More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](d
   or an operator resolves, with KPIs on the dashboard.
 - **Security by default:** every endpoint requires a token unless it opts out; permission policies per role; services
   re-validate the token the gateway issued ([ADR-0004](docs/decisions/ADR-0004-jwt-at-the-gateway.md)).
-- **Architecture as tests:** 39 NetArchTest rules enforce service isolation (the carrier simulator shares no code),
+- **Architecture as tests:** 51 NetArchTest rules enforce service isolation (the carrier simulator and the MCP server share no code),
   layer direction and folder conventions.
 
 ## Technology
@@ -97,6 +103,27 @@ Carrier sandbox: the destination city picks the simulated carrier behaviour. `Sa
 (two 503s), `Sandbox Timeout`, `Sandbox Redelivery` and `Sandbox Address Not Found` (returned to sender); any other
 city is delivered normally. One tracking step every 3 s in compose (`CARRIER_STEP_INTERVAL`).
 
+### Using the MCP server with Claude Code
+
+The repository's [`.mcp.json`](.mcp.json) registers the server as `logistiflow`. With the stack running:
+
+```powershell
+dotnet build src/Mcp/LogistiFlow.McpServer -c Release
+$env:LOGISTIFLOW_PASSWORD = 'Demo-Password-2026!'   # signs in as viewer@logistiflow.local (override LOGISTIFLOW_EMAIL)
+claude                                               # approve the "logistiflow" project server, then ask, e.g.
+                                                     # "Which warehouse has the most open fulfillment jobs?"
+```
+
+Tools: `logistics_get_order`, `logistics_get_inventory`, `logistics_get_shipment`, `logistics_list_exceptions`,
+`logistics_get_warehouse_metrics`. A recorded session, including the defect it found, is in
+[docs/evidence/mcp](docs/evidence/mcp/claude-code-validation.md); the design is [ADR-0009](docs/decisions/ADR-0009-mcp-server.md).
+
+### Claude Code skills
+
+[`.claude/skills`](.claude/skills) holds three review skills for this codebase — `/dotnet-api-review`,
+`/microservices-reliability-review` and `/test-quality-review` — each with a recorded run on this repository in
+[docs/evidence/skills](docs/evidence/skills).
+
 ### Local development
 
 ```bash
@@ -111,10 +138,10 @@ cd src/Web/logistiflow-web && npm ci && npm run dev                      # http:
 
 | Suite | Command | Count |
 |---|---|---|
-| Unit | `dotnet test --project tests/unit/<project>` | 221 |
-| Architecture | `dotnet test --project tests/architecture/LogistiFlow.ArchitectureTests` | 39 |
-| Integration (Docker required) | `dotnet test --project tests/integration/LogistiFlow.IntegrationTests` | 43 |
-| E2E (stack running) | `cd tests/e2e && npm ci && npx playwright test` | 14 |
+| Unit | `dotnet test --project tests/unit/<project>` | 315 |
+| Architecture | `dotnet test --project tests/architecture/LogistiFlow.ArchitectureTests` | 51 |
+| Integration (Docker required) | `dotnet test --project tests/integration/LogistiFlow.IntegrationTests` | 56 |
+| E2E (stack running) | `cd tests/e2e && npm ci && npx playwright test` | 17 |
 | Load | see [docs/performance](docs/performance/README.md) | baseline |
 
 ### Performance baseline (laptop, single instances)
@@ -132,7 +159,7 @@ predates Phase 2; shipping and carrier tracking have not been load tested yet.
 | 2 | Shipping service and deterministic carrier simulator, pick/pack/ship, tracking, exceptions, and the fulfillment, shipments and exceptions pages (moved up from Phase 3) | Done |
 | 3 | "Average processing time" KPI, responsive checks for the new pages, demo flow to delivery (done); UI polish (not started) | Done, except UI polish |
 | 4 | AI Operations Copilot (Microsoft Agent Framework, read-only tools, deterministic demo provider, audit and cost tracking); write actions with preview and confirmation are a later spec | Done |
-| 5 | Custom MCP server and Claude Code skills | Planned |
+| 5 | MCP server (five read-only tools, validated in Claude Code) and three Claude Code review skills | Done |
 | 6 | Observability stack, consumer concurrency, full k6 suite | Planned |
 | 7 | Azure (Bicep: Container Apps, PostgreSQL Flexible, Key Vault), deployment pipeline | Planned |
 
