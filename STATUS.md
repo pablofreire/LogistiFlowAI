@@ -46,9 +46,10 @@ Spec with acceptance criteria AC-32 to AC-40: `docs/specifications/phase-4-ai-op
 
 ## Not yet verified
 
-- Published to `github.com/pablofreire/LogistiFlowAI` on 2026-11-03 (git flow: `main` and `develop`). The first
-  GitHub Actions run comes from this change's pull request; the Docker image matrix `build-args` fix is confirmed only
-  once that run is green.
+- Published to `github.com/pablofreire/LogistiFlowAI` on 2026-11-03 with git flow (`main` and `develop`). The first
+  GitHub Actions run failed to build: the `[Rr]elease/` ignore rule had kept the Inventory release use case out of git.
+  Hotfix pull requests #2 (into `main`) and #3 (into `develop`) ran green end to end, including the Docker image matrix
+  and its `build-args` fix. Nothing is merged yet, so no CI run has happened on `develop` or `main` themselves.
 - No security review pass beyond the automated tests; no OWASP ZAP run.
 - No load test of the Phase 2 paths (shipping, carrier polling) or of the copilot.
 - The OpenAI-compatible provider path is wired but has never answered a real question (no credentials used).
