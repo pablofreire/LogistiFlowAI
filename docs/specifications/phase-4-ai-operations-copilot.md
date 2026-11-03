@@ -1,6 +1,7 @@
 # Spec — Phase 4: AI Operations Copilot
 
-Status: in progress (started 2026-11-03).
+Status: implemented on 2026-11-03. Every criterion below is covered by the named tests or run, which passed locally
+(see `STATUS.md`); GitHub Actions has not run them yet. No real AI model was called: every run used the demo provider.
 
 ## Objective
 Let operators ask questions about live operations ("Why is order ORD-1025 delayed?") and get answers built only from
@@ -66,15 +67,15 @@ tokens and zero cost). The copilot is available to Admin, OpsManager and Warehou
 
 | Id | Acceptance criterion | Verified by |
 |---|---|---|
-| AC-32 | Without AI configuration the service answers with the demo provider and marks every answer `simulated: true` | (pending) |
-| AC-33 | "Why is order X delayed?" for a `Sandbox Delay` order runs `AnalyzeShipmentDelay` and answers with the delay exception's details and the promised and estimated dates | (pending) |
-| AC-34 | Each of the six demo questions runs its tools and answers only from their results | (pending) |
-| AC-35 | Tools call the services with the caller's token; a service's 403 or 404 comes back as a failed or empty tool result, not as invented data | (pending) |
-| AC-36 | Every question is audited with the user, provider, model, answer, each tool call (arguments, outcome, duration) and token usage; the token is not stored | (pending) |
-| AC-37 | A conversation id carries earlier turns into the next question | (pending) |
-| AC-38 | Viewer gets 403; anonymous calls get 401 | (pending) |
-| AC-39 | The copilot page shows the answer, the tools that ran and the "Simulated" badge (E2E-008) | (pending) |
-| AC-40 | The rest of the platform keeps working when AiOperations is down; the console shows the copilot as unavailable | (pending) |
+| AC-32 | Without AI configuration the service answers with the demo provider and marks every answer `simulated: true` | `CopilotFlowTests.Status_*`, `AskCopilotUseCaseTests`, E2E-008 |
+| AC-33 | "Why is order X delayed?" for a `Sandbox Delay` order runs `AnalyzeShipmentDelay` and answers with the delay exception's details and the promised and estimated dates | `CopilotFlowTests.DelayedOrder_*`, `AskCopilotUseCaseTests.DelayQuestion_*`, E2E-008 |
+| AC-34 | Each of the six demo questions runs its tools and answers only from their results | `DemoCopilotScriptTests`, `AskCopilotUseCaseTests`, `OperationsToolsetTests`, `CopilotFlowTests.ReservationFailure_*` |
+| AC-35 | Tools call the services with the caller's token; a service's 403 or 404 comes back as a failed or empty tool result, not as invented data | `AskCopilotUseCaseTests.ToolThatFindsNothing_*` / `ServiceForbidsTheUser_*`, `CopilotFlowTests.UnknownOrder_*` |
+| AC-36 | Every question is audited with the user, provider, model, answer, each tool call (arguments, outcome, duration) and token usage; the token is not stored | `CopilotFlowTests.DelayedOrder_*` / `Audit_NeverStoresTheCallersToken` |
+| AC-37 | A conversation id carries earlier turns into the next question | `AskCopilotUseCaseTests.FollowUp_*`, `CopilotFlowTests.FollowUp_*`, E2E-008 |
+| AC-38 | Viewer gets 403; anonymous calls get 401 | `CopilotFlowTests.Authorization_*`, E2E-009 |
+| AC-39 | The copilot page shows the answer, the tools that ran and the "Simulated" badge (E2E-008) | E2E-008, E2E-010 (phone viewport) |
+| AC-40 | The rest of the platform keeps working when AiOperations is down; the console shows the copilot as unavailable | Compose run 2026-11-03 with `aioperations-api` stopped: dashboard, orders and shipments 200, `/api/ai` 502, copilot page shows "Copilot unavailable" (`docs/evidence/e2e/e2e-manual-copilot-unavailable.png`) |
 
 ## Error scenarios
 Validation (400: empty or too long question), unauthenticated (401), forbidden (403), provider or tool timeout

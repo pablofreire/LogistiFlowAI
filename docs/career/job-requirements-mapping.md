@@ -22,7 +22,7 @@ in the code, not yet proven end to end · **Planned** = on the roadmap, not star
 | Cloud (Azure) | Container Apps + PostgreSQL Flexible + Key Vault design | Planned (Phase 7) |
 | Security | JWT, permission policies, rate limit, BCrypt, parameterized SQL, CSP | Validated (tests); security review pending |
 | Observability | Serilog JSON, correlation ids, OpenTelemetry traces/metrics, health checks | Implemented (dashboards in Phase 6) |
-| AI-powered applications | AI Operations Copilot on Microsoft Agent Framework with read-only tools | Planned (Phase 4) |
+| AI-powered applications | AI Operations Copilot on Microsoft Agent Framework: read-only tools over the services with the caller's token, deterministic demo provider, audit, token and cost tracking | Validated (demo provider; no real model run) |
 | Custom MCP server | `LogistiFlow.McpServer` | Planned (Phase 5) |
 | AI development tools | Claude Code agents in `.claude/agents`; skills planned for Phase 5 | Implemented (agents) |
 | Logistics domain | Orders, multi-warehouse reservation, pick/pack/ship, carrier assignment, tracking, delivery estimates, delays and exceptions, stock ledger | Validated |

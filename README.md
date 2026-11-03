@@ -2,11 +2,12 @@
 
 **Cloud-native logistics and fulfillment platform** — a reference implementation of event-driven .NET microservices
 for an e-commerce fulfillment operator: order intake, multi-warehouse inventory reservation, warehouse fulfillment,
-carrier shipping with tracking and exceptions, and an operations console. AI agents (an operations copilot and an MCP server) are built on top of this core in later phases.
+carrier shipping with tracking and exceptions, an operations console, and an AI operations copilot that answers from
+live platform data through read-only tools. An MCP server is built on top of this core in a later phase.
 
-> Status: **Phases 1 and 2 complete** — an order runs from intake through reservation, pick, pack and ship to carrier
-> delivery (or return) in Docker Compose, covered by unit, architecture, integration (Testcontainers) and Playwright
-> tests, plus a k6 baseline for intake. See [STATUS.md](STATUS.md) for what is validated and what is planned.
+> Status: **Phases 1 to 4 complete** — an order runs from intake through reservation, pick, pack and ship to carrier
+> delivery (or return) in Docker Compose, and an operations copilot explains it from live data, covered by unit,
+> architecture, integration (Testcontainers) and Playwright tests, plus a k6 baseline for intake. See [STATUS.md](STATUS.md) for what is validated and what is planned.
 
 ![Operations dashboard](docs/evidence/e2e/e2e-003-dashboard-updated.png)
 
@@ -22,6 +23,8 @@ part of the system can be deployed, scaled and fail independently.
 flowchart LR
     web[React SPA<br/>nginx] -->|/api| gw[Gateway<br/>JWT · YARP · dashboard]
     gw --> orders[Orders] & inventory[Inventory] & fulfillment[Fulfillment] & shipping[Shipping]
+    gw --> ai[AiOperations<br/>copilot]
+    ai -->|read-only tools,<br/>caller's token| orders & inventory & fulfillment & shipping
     orders <--> mq{{RabbitMQ}}
     inventory <--> mq
     fulfillment <--> mq
@@ -31,6 +34,7 @@ flowchart LR
     inventory --- idb[(inventory db)]
     fulfillment --- fdb[(fulfillment db)]
     shipping --- sdb[(shipping db)]
+    ai --- adb[(aiops db<br/>audit)]
 ```
 
 | Component | Responsibility |
@@ -39,13 +43,15 @@ flowchart LR
 | **Inventory** | Products, warehouses, stock positions, all-or-nothing single-warehouse reservations, stock ledger |
 | **Fulfillment** | One job per reserved order; pick, pack, ship, report issue and reprocess; execution history |
 | **Shipping** | Shipments, carrier assignment, estimates, tracking, delays and operational exceptions |
+| **AiOperations** | Operations copilot on Microsoft Agent Framework: nine read-only tools over the services, a deterministic demo provider (labelled as simulated) or an OpenAI-compatible model, audit of every question, tool call, token and cost |
 | **Carrier simulator** | Stand-in for carrier APIs with deterministic scenarios (delay, 503, timeout, redelivery, return) |
 | **Gateway** | Identity and JWT issuance, rate-limited login, YARP routing, resilient dashboard aggregation |
-| **Web** | React + TypeScript console: dashboard, orders, fulfillment queue, shipments, exceptions, inventory |
+| **Web** | React + TypeScript console: dashboard, orders, fulfillment queue, shipments, exceptions, inventory, copilot |
 
 More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](docs/specifications/phase-1-order-to-fulfillment.md) ·
 [Phase 2 spec](docs/specifications/phase-2-fulfillment-to-delivery.md) ·
-[Phase 3 spec](docs/specifications/phase-3-processing-time-and-responsive.md) · [ADRs](docs/decisions).
+[Phase 3 spec](docs/specifications/phase-3-processing-time-and-responsive.md) ·
+[Phase 4 spec](docs/specifications/phase-4-ai-operations-copilot.md) · [ADRs](docs/decisions).
 
 ### Engineering highlights
 
@@ -125,7 +131,7 @@ predates Phase 2; shipping and carrier tracking have not been load tested yet.
 | 0–1 | Foundation, Orders, Inventory, Fulfillment, Gateway, web console, tests, compose, CI | Done |
 | 2 | Shipping service and deterministic carrier simulator, pick/pack/ship, tracking, exceptions, and the fulfillment, shipments and exceptions pages (moved up from Phase 3) | Done |
 | 3 | "Average processing time" KPI, responsive checks for the new pages, demo flow to delivery (done); UI polish (not started) | Done, except UI polish |
-| 4 | AI Operations Copilot (Microsoft Agent Framework, read-only tools, deterministic demo provider) | Planned |
+| 4 | AI Operations Copilot (Microsoft Agent Framework, read-only tools, deterministic demo provider, audit and cost tracking); write actions with preview and confirmation are a later spec | Done |
 | 5 | Custom MCP server and Claude Code skills | Planned |
 | 6 | Observability stack, consumer concurrency, full k6 suite | Planned |
 | 7 | Azure (Bicep: Container Apps, PostgreSQL Flexible, Key Vault), deployment pipeline | Planned |

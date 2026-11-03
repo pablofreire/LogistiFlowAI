@@ -9,6 +9,9 @@ flowchart LR
     gw -->|REST + bearer| inventory[Inventory API]
     gw -->|REST + bearer| fulfillment[Fulfillment API]
     gw -->|REST + bearer| shipping[Shipping API]
+    gw -->|REST + bearer| ai[AiOperations API<br/>copilot]
+    ai -->|read-only tools · caller's bearer| orders & inventory & fulfillment & shipping
+    ai --- adb[(aiops db · audit)]
     gw --- idb[(identity db)]
     orders --- odb[(orders db)]
     inventory --- ivdb[(inventory db)]
@@ -73,6 +76,30 @@ sequenceDiagram
     S->>MQ: ShipmentDelivered (or ShipmentReturned)
     MQ->>O: Delivered (or Failed: returned to sender)
 ```
+
+## Copilot: how a question is answered
+
+```mermaid
+sequenceDiagram
+    participant W as Web
+    participant G as Gateway
+    participant A as AiOperations
+    participant P as Provider (demo or model)
+    participant S as Orders / Inventory / Fulfillment / Shipping
+    W->>G: POST /api/ai/copilot/ask (bearer)
+    G->>A: proxy (bearer)
+    A->>P: question + tool definitions (ChatClientAgent)
+    P-->>A: call AnalyzeShipmentDelay(ORD-1025)
+    A->>S: GET with the caller's bearer token
+    S-->>A: shipment, tracking, exceptions (or 403 / 404)
+    A->>P: tool result
+    P-->>A: answer built from the result
+    A->>A: audit question, tool calls, tokens, cost (no token stored)
+    A-->>W: answer + tool calls + provider + simulated flag
+```
+
+The services stay the only authority on what a user may read: a tool sees exactly what the caller could see through
+the console. Without AI configuration the demo provider runs the same loop with fixed rules (ADR-0008).
 
 ## Integration events (v1)
 
