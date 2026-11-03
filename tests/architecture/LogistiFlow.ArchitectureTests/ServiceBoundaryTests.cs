@@ -1,5 +1,6 @@
 using LogistiFlow.ArchitectureTests.Support;
 using LogistiFlow.CarrierSimulator.Composition;
+using LogistiFlow.McpServer.Composition;
 
 namespace LogistiFlow.ArchitectureTests;
 
@@ -57,6 +58,17 @@ public sealed class ServiceBoundaryTests
 
         simulator.GetName().Name.Should().Be("LogistiFlow.CarrierSimulator");
         simulator.GetReferencedAssemblies()
+            .Should().NotContain(reference => reference.Name!.StartsWith("LogistiFlow.", StringComparison.Ordinal));
+    }
+
+    /// <summary>The MCP server is a gateway client: it reaches the platform over HTTP only and shares no code with it.</summary>
+    [Fact]
+    public void McpServer_ReferencesNoLogistiFlowAssembly()
+    {
+        var server = typeof(McpServerServiceCollectionExtensions).Assembly;
+
+        server.GetName().Name.Should().Be("LogistiFlow.McpServer");
+        server.GetReferencedAssemblies()
             .Should().NotContain(reference => reference.Name!.StartsWith("LogistiFlow.", StringComparison.Ordinal));
     }
 }
