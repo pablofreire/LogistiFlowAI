@@ -17,7 +17,7 @@ in the code, not yet proven end to end · **Planned** = on the roadmap, not star
 | Integration testing | Testcontainers PostgreSQL + RabbitMQ, carrier simulator in-process — 56 tests | Validated |
 | E2E testing | Playwright TS against Docker Compose — 17 tests (E2E-001..010) | Validated |
 | Performance testing | k6 baseline, real numbers and a documented bottleneck (`docs/performance`) | Validated (baseline only; Phase 2 paths not load tested) |
-| DevOps / CI | GitHub Actions: build, tests, E2E on compose, gitleaks, CodeQL, Docker images | Validated (green on GitHub Actions for the hotfix pull requests, 2026-11-03) |
+| DevOps / CI | GitHub Actions: build, tests, E2E on compose, gitleaks, CodeQL, Docker images | Validated (green on GitHub Actions for pull requests and for `main` and `develop` pushes, 2026-11-03) |
 | Containers | Multi-stage, non-root images; compose with init-container migrations | Validated (local) |
 | Cloud (Azure) | Container Apps + PostgreSQL Flexible + Key Vault design | Planned (Phase 7) |
 | Security | JWT, permission policies, rate limit, BCrypt, parameterized SQL, CSP | Validated (tests); security review pending |

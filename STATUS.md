@@ -19,7 +19,15 @@ Single source of truth for progress and the resume point of every work session. 
 | Platform keeps working with `aioperations-api` stopped: dashboard, orders, shipments 200; `/api/ai` 502; copilot page shows "Copilot unavailable" | manual run 2026-11-03, `docs/evidence/e2e/e2e-manual-copilot-unavailable.png` | Passing |
 | MCP server used by Claude Code 2.1.301 through `.mcp.json` against compose: five tools, answers cross-checked with the gateway | `docs/evidence/mcp/claude-code-validation.md` (run 1 found a defect, run 2 after the fix) | Passing |
 | Skills `dotnet-api-review`, `microservices-reliability-review`, `test-quality-review` found and run by Claude Code on this repository | `docs/evidence/skills/*.md` | Run, findings recorded |
+| GitHub Actions on `main` and `develop` pushes: CI (build, tests, web, 8 Docker images, gitleaks, Playwright E2E on compose) and CodeQL | `github.com/pablofreire/LogistiFlowAI/actions`: runs 41707611529 (`main` 6e66428) and 41707650865 (`develop` 48f5e93), 2026-11-03 | Passing |
 | Dashboard degrades with `shipping-api` stopped (`unavailableSources: ["shipping"]`, other sections present) | manual run 2026-10-29 | Passing |
+
+## Repository and CI
+
+Published to `github.com/pablofreire/LogistiFlowAI` on 2026-11-03 with git flow (`main` and `develop`), both protected
+by 14 required checks. The first GitHub Actions run failed to build: the `[Rr]elease/` ignore rule had kept the
+Inventory release use case out of git. The hotfix (#2 into `main`, #3 into `develop`) was merged and the push runs on
+both branches are green, including the Docker image matrix and its `build-args` fix.
 
 ## Phase 2 (done): pick, pack, ship → carrier tracking → delivery and exceptions
 
@@ -83,10 +91,6 @@ Spec with acceptance criteria AC-41 to AC-50: `docs/specifications/phase-5-mcp-s
 
 ## Not yet verified
 
-- Published to `github.com/pablofreire/LogistiFlowAI` on 2026-11-03 with git flow (`main` and `develop`). The first
-  GitHub Actions run failed to build: the `[Rr]elease/` ignore rule had kept the Inventory release use case out of git.
-  Hotfix pull requests #2 (into `main`) and #3 (into `develop`) ran green end to end, including the Docker image matrix
-  and its `build-args` fix. Nothing is merged yet, so no CI run has happened on `develop` or `main` themselves.
 - No security review pass beyond the automated tests; no OWASP ZAP run.
 - No load test of the Phase 2 paths (shipping, carrier polling) or of the copilot.
 - The OpenAI-compatible provider path is wired but has never answered a real question (no credentials used).
