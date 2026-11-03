@@ -6,26 +6,29 @@ import {
   IconForklift,
   IconLayoutDashboard,
   IconLogout,
+  IconMessageChatbot,
   IconMoon,
   IconPackage,
   IconSun,
   IconTruck,
 } from '@tabler/icons-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import type { Role } from '../../api/types';
 import { useAuth } from '../../auth/useAuth';
 
-const navigation = [
+const navigation: { to: string; label: string; icon: typeof IconPackage; testId: string; roles?: Role[] }[] = [
   { to: '/', label: 'Dashboard', icon: IconLayoutDashboard, testId: 'nav-dashboard' },
   { to: '/orders', label: 'Orders', icon: IconPackage, testId: 'nav-orders' },
   { to: '/fulfillment', label: 'Fulfillment', icon: IconForklift, testId: 'nav-fulfillment' },
   { to: '/shipments', label: 'Shipments', icon: IconTruck, testId: 'nav-shipments' },
   { to: '/exceptions', label: 'Exceptions', icon: IconAlertOctagon, testId: 'nav-exceptions' },
   { to: '/inventory', label: 'Inventory', icon: IconBuildingWarehouse, testId: 'nav-inventory' },
+  { to: '/copilot', label: 'Copilot', icon: IconMessageChatbot, testId: 'nav-copilot', roles: ['Admin', 'OpsManager', 'WarehouseOperator'] },
 ];
 
 export function AppLayout() {
   const [opened, { toggle, close }] = useDisclosure();
-  const { user, signOut } = useAuth();
+  const { user, signOut, hasRole } = useAuth();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const location = useLocation();
 
@@ -71,7 +74,7 @@ export function AppLayout() {
 
       <AppShell.Navbar p="sm">
         <nav aria-label="Main">
-          {navigation.map((item) => (
+          {navigation.filter((item) => !item.roles || hasRole(...item.roles)).map((item) => (
             <NavLink
               key={item.to}
               component={Link}

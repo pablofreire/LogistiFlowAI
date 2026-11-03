@@ -1,6 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { request, toQueryString } from './client';
 import type {
+  AskCopilotBody,
+  CopilotAnswer,
+  CopilotStatus,
   CreateOrderBody,
   DashboardSummary,
   FulfillmentActionResult,
@@ -38,6 +41,7 @@ const keys = {
   shipment: (id: string) => ['shipment', id] as const,
   shipmentByOrder: (orderId: string) => ['order', orderId, 'shipment'] as const,
   exceptions: (filters: ExceptionFilters) => ['shipment-exceptions', filters] as const,
+  copilotStatus: ['copilot-status'] as const,
 };
 
 export interface JobFilters {
@@ -252,5 +256,21 @@ export function useRetryBooking(shipmentId: string) {
   return useMutation({
     mutationFn: async () => (await request<ShipmentActionOutcome>(`/api/shipping/shipments/${shipmentId}/retry-booking`, { method: 'POST' })).data,
     onSuccess: () => client.invalidateQueries({ queryKey: keys.shipment(shipmentId) }),
+  });
+}
+
+/** Which provider answers; a failure means the copilot is down while the rest of the console keeps working. */
+export function useCopilotStatus() {
+  return useQuery({
+    queryKey: keys.copilotStatus,
+    queryFn: async ({ signal }) => (await request<CopilotStatus>('/api/ai/copilot/status', { signal })).data,
+    retry: false,
+    staleTime: 60_000,
+  });
+}
+
+export function useAskCopilot() {
+  return useMutation({
+    mutationFn: async (body: AskCopilotBody) => (await request<CopilotAnswer>('/api/ai/copilot/ask', { method: 'POST', body })).data,
   });
 }

@@ -33,7 +33,7 @@ test.describe('E2E-010 Responsive UI', () => {
     await evidence(page, 'e2e-010-mobile-orders');
   });
 
-  test('fulfillment, shipments, shipment details and exceptions fit a phone viewport', async ({ page, request }) => {
+  test('fulfillment, shipments, shipment details, exceptions and the copilot fit a phone viewport', async ({ page, request }) => {
     const managerToken = await apiToken(request, users.opsManager);
     const operatorToken = await apiToken(request, users.warehouseOperator);
     const order = await apiCreateOrder(request, managerToken, { customer: `E2E Responsive ${Date.now()}`, sku: 'SKU-1003', quantity: 1 });
@@ -65,5 +65,13 @@ test.describe('E2E-010 Responsive UI', () => {
     await expect(page.getByRole('heading', { name: 'Logistics exceptions' })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await evidence(page, 'e2e-010-mobile-exceptions');
+
+    await navigate(page, 'nav-copilot');
+    await expect(page.getByRole('heading', { name: 'Operations copilot' })).toBeVisible();
+    await page.getByTestId('copilot-question').fill('Which warehouse has the highest number of fulfillment failures?');
+    await page.getByTestId('copilot-ask').click();
+    await expect(page.getByTestId('copilot-answer')).toContainText('Low-stock positions');
+    await expectNoHorizontalOverflow(page);
+    await evidence(page, 'e2e-010-mobile-copilot');
   });
 });

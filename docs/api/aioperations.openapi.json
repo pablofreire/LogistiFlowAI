@@ -1,0 +1,613 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "LogistiFlow.AiOperations.Api | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5105/"
+    }
+  ],
+  "paths": {
+    "/api/ai/copilot/status": {
+      "get": {
+        "tags": [
+          "Copilot"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfGetCopilotStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/copilot/ask": {
+      "post": {
+        "tags": [
+          "Copilot"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskCopilotBody"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskCopilotBody"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskCopilotBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfAskCopilotResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/interactions": {
+      "get": {
+        "tags": [
+          "CopilotInteractions"
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPagedResultOfCopilotInteractionSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ApiResponseOfAskCopilotResponse": {
+        "required": [
+          "success",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AskCopilotResponse"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Envelope used by every REST endpoint so clients handle success and failure uniformly."
+      },
+      "ApiResponseOfGetCopilotStatusResponse": {
+        "required": [
+          "success",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GetCopilotStatusResponse"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Envelope used by every REST endpoint so clients handle success and failure uniformly."
+      },
+      "ApiResponseOfObject": {
+        "required": [
+          "success",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": { },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Envelope used by every REST endpoint so clients handle success and failure uniformly."
+      },
+      "ApiResponseOfPagedResultOfCopilotInteractionSummary": {
+        "required": [
+          "success",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PagedResultOfCopilotInteractionSummary"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Envelope used by every REST endpoint so clients handle success and failure uniformly."
+      },
+      "AskCopilotBody": {
+        "required": [
+          "question",
+          "conversationId"
+        ],
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "conversationId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AskCopilotResponse": {
+        "required": [
+          "interactionId",
+          "conversationId",
+          "answer",
+          "provider",
+          "model",
+          "simulated",
+          "toolCalls",
+          "usage",
+          "durationMs",
+          "answeredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "interactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "simulated": {
+            "type": "boolean"
+          },
+          "toolCalls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CopilotToolCallItem"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/CopilotUsageItem"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "answeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CopilotInteractionSummary": {
+        "required": [
+          "id",
+          "conversationId",
+          "userEmail",
+          "userRole",
+          "question",
+          "outcome",
+          "failureReason",
+          "provider",
+          "model",
+          "simulated",
+          "tools",
+          "totalTokens",
+          "estimatedCostUsd",
+          "durationMs",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userEmail": {
+            "type": "string"
+          },
+          "userRole": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "failureReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "simulated": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "totalTokens": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "estimatedCostUsd": {
+            "type": "number",
+            "format": "double"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CopilotToolCallItem": {
+        "required": [
+          "sequence",
+          "name",
+          "arguments",
+          "outcome",
+          "summary",
+          "durationMs"
+        ],
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CopilotUsageItem": {
+        "required": [
+          "inputTokens",
+          "outputTokens",
+          "totalTokens",
+          "estimatedCostUsd"
+        ],
+        "type": "object",
+        "properties": {
+          "inputTokens": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "outputTokens": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "totalTokens": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int64"
+          },
+          "estimatedCostUsd": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "GetCopilotStatusResponse": {
+        "required": [
+          "provider",
+          "model",
+          "simulated",
+          "tools",
+          "sampleQuestions"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "simulated": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sampleQuestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PagedResultOfCopilotInteractionSummary": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CopilotInteractionSummary"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Copilot"
+    },
+    {
+      "name": "CopilotInteractions"
+    }
+  ]
+}

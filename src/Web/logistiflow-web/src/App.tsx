@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './auth/RequireAuth';
 import { AppLayout } from './components/layout/AppLayout';
+import { CopilotPage } from './pages/CopilotPage';
 import { CreateOrderPage } from './pages/CreateOrderPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ExceptionsPage } from './pages/ExceptionsPage';
@@ -39,6 +40,14 @@ export function App() {
         <Route path="shipments/:shipmentId" element={<ShipmentDetailsPage />} />
         <Route path="exceptions" element={<ExceptionsPage />} />
         <Route path="inventory" element={<InventoryPage />} />
+        <Route
+          path="copilot"
+          element={
+            <RequireAuth roles={['Admin', 'OpsManager', 'WarehouseOperator']}>
+              <CopilotPage />
+            </RequireAuth>
+          }
+        />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -1,4 +1,5 @@
 // Contract types generated from the services' OpenAPI documents (npm run generate:api). Never edit generated files.
+import type { components as AiOperationsContract } from './generated/aioperations';
 import type { components as FulfillmentContract } from './generated/fulfillment';
 import type { components as GatewayContract } from './generated/gateway';
 import type { components as InventoryContract } from './generated/inventory';
@@ -10,6 +11,7 @@ type Inventory = InventoryContract['schemas'];
 type Fulfillment = FulfillmentContract['schemas'];
 type Gateway = GatewayContract['schemas'];
 type Shipping = ShippingContract['schemas'];
+type AiOperations = AiOperationsContract['schemas'];
 
 export type LoginResponse = Gateway['LoginResponse'];
 export type AuthenticatedUser = Gateway['AuthenticatedUser'];
@@ -46,6 +48,11 @@ export type ShipmentExceptionStatus = Shipping['ShipmentExceptionStatus'];
 export type ShipmentExceptionType = Shipping['ShipmentExceptionType'];
 export type ShipmentActionOutcome = Shipping['ShipmentActionOutcome'];
 export type ShippingMetrics = Shipping['GetShippingMetricsResponse'];
+
+export type CopilotStatus = AiOperations['GetCopilotStatusResponse'];
+export type AskCopilotBody = AiOperations['AskCopilotBody'];
+export type CopilotAnswer = AiOperations['AskCopilotResponse'];
+export type CopilotToolCall = AiOperations['CopilotToolCallItem'];
 
 /** The gateway forwards each service's metrics untouched; the sections keep their service contracts. */
 export interface DashboardSummary {
