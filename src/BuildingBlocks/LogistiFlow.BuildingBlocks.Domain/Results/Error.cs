@@ -21,6 +21,8 @@ public sealed record Error(
 
     public static Error Unauthorized(string code, string message) => new(code, message, ErrorType.Unauthorized);
 
+    public static Error Unavailable(string code, string message) => new(code, message, ErrorType.Unavailable);
+
     public static Error Validation(string code, string message, IReadOnlyDictionary<string, string[]>? details = null) =>
         new(code, message, ErrorType.Validation, details);
 }

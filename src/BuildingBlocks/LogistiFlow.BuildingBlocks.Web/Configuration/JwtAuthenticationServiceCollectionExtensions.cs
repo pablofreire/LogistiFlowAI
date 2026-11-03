@@ -54,7 +54,11 @@ public static class JwtAuthenticationServiceCollectionExtensions
             .AddPolicy(AuthorizationPolicies.ManageShipments, policy => policy.RequireRole(LogistiFlowRoles.Admin, LogistiFlowRoles.OpsManager))
             .AddPolicy(
                 AuthorizationPolicies.OperateWarehouse,
-                policy => policy.RequireRole(LogistiFlowRoles.Admin, LogistiFlowRoles.OpsManager, LogistiFlowRoles.WarehouseOperator));
+                policy => policy.RequireRole(LogistiFlowRoles.Admin, LogistiFlowRoles.OpsManager, LogistiFlowRoles.WarehouseOperator))
+            .AddPolicy(
+                AuthorizationPolicies.UseCopilot,
+                policy => policy.RequireRole(LogistiFlowRoles.Admin, LogistiFlowRoles.OpsManager, LogistiFlowRoles.WarehouseOperator))
+            .AddPolicy(AuthorizationPolicies.ReviewCopilotAudit, policy => policy.RequireRole(LogistiFlowRoles.Admin, LogistiFlowRoles.OpsManager));
 
         return services;
     }

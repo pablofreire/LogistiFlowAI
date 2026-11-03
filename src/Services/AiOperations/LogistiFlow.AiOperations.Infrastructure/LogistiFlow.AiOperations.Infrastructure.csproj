@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/LogistiFlow.BuildingBlocks.Infrastructure/LogistiFlow.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../LogistiFlow.AiOperations.Application/LogistiFlow.AiOperations.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Migrations\*.sql" />
+  </ItemGroup>
+
+</Project>

@@ -11,4 +11,7 @@ public enum ErrorType
     Conflict = 3,
     Forbidden = 4,
     Unauthorized = 5,
+
+    /// <summary>A dependency the operation needs is down or not configured; the caller may retry later.</summary>
+    Unavailable = 6,
 }

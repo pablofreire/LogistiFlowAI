@@ -20,4 +20,10 @@ public static class AuthorizationPolicies
 
     /// <summary>Resolve shipment exceptions and retry failed carrier bookings.</summary>
     public const string ManageShipments = "shipments.manage";
+
+    /// <summary>Ask the operations copilot. Each question spends model tokens, so read-only viewers are excluded.</summary>
+    public const string UseCopilot = "copilot.use";
+
+    /// <summary>Review the copilot audit trail: every user's questions, tool calls and cost.</summary>
+    public const string ReviewCopilotAudit = "copilot.audit";
 }

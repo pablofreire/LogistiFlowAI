@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/LogistiFlow.BuildingBlocks.Application/LogistiFlow.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="../LogistiFlow.AiOperations.Domain/LogistiFlow.AiOperations.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+  </ItemGroup>
+
+</Project>
