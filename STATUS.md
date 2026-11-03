@@ -46,8 +46,9 @@ Spec with acceptance criteria AC-32 to AC-40: `docs/specifications/phase-4-ai-op
 
 ## Not yet verified
 
-- GitHub Actions workflows are written but have never run (no remote; push not authorized). The Docker image matrix
-  had a latent `build-args` bug that was fixed without a CI run to confirm it.
+- Published to `github.com/pablofreire/LogistiFlowAI` on 2026-11-03 (git flow: `main` and `develop`). The first
+  GitHub Actions run comes from this change's pull request; the Docker image matrix `build-args` fix is confirmed only
+  once that run is green.
 - No security review pass beyond the automated tests; no OWASP ZAP run.
 - No load test of the Phase 2 paths (shipping, carrier polling) or of the copilot.
 - The OpenAI-compatible provider path is wired but has never answered a real question (no credentials used).
