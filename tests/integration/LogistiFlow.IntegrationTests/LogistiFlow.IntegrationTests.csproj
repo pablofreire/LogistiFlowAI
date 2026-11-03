@@ -13,6 +13,7 @@
     <ProjectReference Include="../../../src/Services/Shipping/LogistiFlow.Shipping.Api/LogistiFlow.Shipping.Api.csproj" />
     <ProjectReference Include="../../../src/Services/AiOperations/LogistiFlow.AiOperations.Api/LogistiFlow.AiOperations.Api.csproj" />
     <ProjectReference Include="../../../src/Simulators/LogistiFlow.CarrierSimulator/LogistiFlow.CarrierSimulator.csproj" />
+    <ProjectReference Include="../../../src/Mcp/LogistiFlow.McpServer/LogistiFlow.McpServer.csproj" />
   </ItemGroup>
 
 </Project>

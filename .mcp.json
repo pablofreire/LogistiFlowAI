@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "logistiflow": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["src/Mcp/LogistiFlow.McpServer/bin/Release/net10.0/LogistiFlow.McpServer.dll"],
+      "env": {
+        "LOGISTIFLOW_GATEWAY_URL": "${LOGISTIFLOW_GATEWAY_URL:-http://localhost:8089}",
+        "LOGISTIFLOW_ACCESS_TOKEN": "${LOGISTIFLOW_ACCESS_TOKEN:-}",
+        "LOGISTIFLOW_EMAIL": "${LOGISTIFLOW_EMAIL:-viewer@logistiflow.local}",
+        "LOGISTIFLOW_PASSWORD": "${LOGISTIFLOW_PASSWORD:-}"
+      }
+    }
+  }
+}

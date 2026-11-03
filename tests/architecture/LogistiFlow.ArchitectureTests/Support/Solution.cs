@@ -2,6 +2,7 @@ using System.Reflection;
 using LogistiFlow.AiOperations.Api.Composition;
 using LogistiFlow.Fulfillment.Api.Composition;
 using LogistiFlow.Inventory.Api.Composition;
+using LogistiFlow.McpServer.Composition;
 using LogistiFlow.Orders.Api.Composition;
 using LogistiFlow.Shipping.Api.Composition;
 using NetArchTest.Rules;
@@ -39,7 +40,7 @@ internal static class Solution
 
     private static List<Assembly> LoadAll()
     {
-        var roots = new[] { typeof(OrdersApiMarker).Assembly, typeof(InventoryApiMarker).Assembly, typeof(FulfillmentApiMarker).Assembly, typeof(ShippingApiMarker).Assembly, typeof(AiOperationsApiMarker).Assembly };
+        var roots = new[] { typeof(OrdersApiMarker).Assembly, typeof(InventoryApiMarker).Assembly, typeof(FulfillmentApiMarker).Assembly, typeof(ShippingApiMarker).Assembly, typeof(AiOperationsApiMarker).Assembly, typeof(McpServerServiceCollectionExtensions).Assembly };
         var loaded = new Dictionary<string, Assembly>(StringComparer.Ordinal);
         var pending = new Queue<Assembly>(roots);
         while (pending.Count > 0)
