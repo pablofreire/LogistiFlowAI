@@ -41,11 +41,16 @@ internal static class OrderReadQueries
 
     public const string CreatedLast24Hours = "SELECT count(*) FROM orders.orders WHERE is_active AND created_at >= now() - interval '24 hours'";
 
-    public const string AverageSecondsToPicking = """
-        SELECT avg(extract(epoch FROM (c.occurred_at - o.created_at)))::float8
-        FROM orders.order_status_changes c
-        JOIN orders.orders o ON o.id = c.order_id
-        WHERE c.to_status = 'Picking'
+    /// <summary>Mean seconds from order creation to its first change into <c>@Status</c>, over the orders that reached it.</summary>
+    public const string AverageSecondsToStatus = """
+        SELECT avg(extract(epoch FROM (first_change.occurred_at - o.created_at)))::float8
+        FROM (
+            SELECT order_id, min(occurred_at) AS occurred_at
+            FROM orders.order_status_changes
+            WHERE to_status = @Status
+            GROUP BY order_id
+        ) first_change
+        JOIN orders.orders o ON o.id = first_change.order_id
         """;
 
     public const string RecentActivity = """

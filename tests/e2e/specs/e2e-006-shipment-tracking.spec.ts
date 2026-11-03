@@ -4,7 +4,12 @@ interface ShippingMetrics {
   delivered: number;
 }
 
+interface OrdersMetrics {
+  averageSecondsToDelivered: number | null;
+}
+
 interface DashboardSummary {
+  orders: OrdersMetrics | null;
   shipping: ShippingMetrics | null;
 }
 
@@ -39,6 +44,9 @@ test.describe('E2E-006 Shipment tracking', () => {
     expect(after.shipping!.delivered).toBeGreaterThanOrEqual(before.shipping!.delivered + 1);
     await page.getByTestId('nav-dashboard').click();
     await expect(page.getByTestId('kpi-delivered-value')).not.toHaveText(before.shipping!.delivered.toLocaleString('en-US'));
+    // At least one order is delivered now, so the end-to-end processing time has a value.
+    expect(after.orders!.averageSecondsToDelivered).toBeGreaterThan(0);
+    await expect(page.getByTestId('kpi-processing-time-value')).toHaveText(/^\d+(\.\d)? (s|min|h)$/);
     await evidence(page, 'e2e-006-dashboard-delivered');
   });
 });

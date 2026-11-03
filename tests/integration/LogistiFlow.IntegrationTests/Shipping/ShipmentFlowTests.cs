@@ -115,6 +115,30 @@ public sealed class ShipmentFlowTests(LogistiFlowEnvironment environment) : IDis
             .Should().BeEquivalentTo("CarrierUnavailable", "Delay", "DeliveryAttemptFailed", "ReturnedToSender");
     }
 
+    [Fact]
+    public async Task OrderMetrics_ReportProcessingTimes_OnceAnOrderIsDelivered()
+    {
+        var orderId = await _steps.ShipOrderAsync("SKU-1003", 1);
+        await _steps.WaitForOrderAsync(orderId, "Delivered");
+
+        var metrics = await (await _steps.Orders.GetAsync("/api/metrics/orders")).ReadDataAsync();
+        var toPicking = metrics.GetProperty("averageSecondsToPicking").GetDouble();
+        var toShipped = metrics.GetProperty("averageSecondsToShipped").GetDouble();
+        var toDelivered = metrics.GetProperty("averageSecondsToDelivered").GetDouble();
+
+        toPicking.Should().BeGreaterThan(0);
+        toShipped.Should().BeGreaterThan(0);
+        toDelivered.Should().BeGreaterThan(0);
+
+        // Measured from this order's own history: delivery comes after shipping, which comes after picking.
+        await using var db = await environment.OpenAsync(Databases.Orders);
+        var reached = (await db.QueryAsync<string>(
+                "SELECT c.to_status FROM orders.order_status_changes c JOIN orders.orders o ON o.id = c.order_id WHERE o.public_id = @orderId ORDER BY c.id",
+                new { orderId }))
+            .ToList();
+        reached.Should().ContainInOrder("Picking", "Shipped", "Delivered");
+    }
+
     public void Dispose() => _steps.Dispose();
 
     private static MessageEnvelope Shipped(Guid jobId, Guid orderId, string orderNumber, string warehouse, Guid reservationId)

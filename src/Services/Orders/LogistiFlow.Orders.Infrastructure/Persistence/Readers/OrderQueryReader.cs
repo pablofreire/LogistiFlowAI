@@ -7,6 +7,7 @@ using LogistiFlow.Orders.Application.UseCases.Orders.Shared;
 using LogistiFlow.Orders.Domain.Enums;
 using LogistiFlow.Orders.Infrastructure.Persistence.Queries;
 using LogistiFlow.Orders.Infrastructure.Persistence.Rows;
+using Npgsql;
 
 namespace LogistiFlow.Orders.Infrastructure.Persistence.Readers;
 
@@ -70,14 +71,18 @@ public sealed class OrderQueryReader(IDbSession session) : IOrderQueries
             .ToDictionary(status => status.ToString(), status => counts.GetValueOrDefault(status.ToString()), StringComparer.Ordinal);
 
         var last24Hours = await connection.ExecuteScalarAsync<long>(new CommandDefinition(OrderReadQueries.CreatedLast24Hours, transaction: session.Transaction, cancellationToken: cancellationToken));
-        var averageToPicking = await connection.ExecuteScalarAsync<double?>(new CommandDefinition(OrderReadQueries.AverageSecondsToPicking, transaction: session.Transaction, cancellationToken: cancellationToken));
+        var averageToPicking = await AverageSecondsToAsync(connection, OrderStatus.Picking, cancellationToken);
+        var averageToShipped = await AverageSecondsToAsync(connection, OrderStatus.Shipped, cancellationToken);
+        var averageToDelivered = await AverageSecondsToAsync(connection, OrderStatus.Delivered, cancellationToken);
         var recent = await connection.QueryAsync<OrderStatusChangeRow>(new CommandDefinition(OrderReadQueries.RecentActivity, new { Limit = recentActivityLimit }, session.Transaction, cancellationToken: cancellationToken));
 
         return new GetOrdersMetricsResponse(
             byStatus.Values.Sum(),
             byStatus,
             last24Hours,
-            averageToPicking is null ? null : Math.Round(averageToPicking.Value, 2),
+            averageToPicking,
+            averageToShipped,
+            averageToDelivered,
             recent.Select(row => new RecentOrderActivity(
                     row.OrderId,
                     row.OrderNumber,
@@ -87,6 +92,12 @@ public sealed class OrderQueryReader(IDbSession session) : IOrderQueries
                     row.Source,
                     row.OccurredAt))
                 .ToList());
+    }
+
+    private async Task<double?> AverageSecondsToAsync(NpgsqlConnection connection, OrderStatus status, CancellationToken cancellationToken)
+    {
+        var average = await connection.ExecuteScalarAsync<double?>(new CommandDefinition(OrderReadQueries.AverageSecondsToStatus, new { Status = status.ToString() }, session.Transaction, cancellationToken: cancellationToken));
+        return average is null ? null : Math.Round(average.Value, 2);
     }
 
     private static OrderStatus? ParseStatus(string? value) => value is null ? null : Enum.Parse<OrderStatus>(value);

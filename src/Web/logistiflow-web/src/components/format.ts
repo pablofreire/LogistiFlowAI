@@ -20,7 +20,11 @@ export function formatDuration(seconds: number | null | undefined): string {
     return '—';
   }
 
-  return seconds < 60 ? `${seconds.toFixed(1)} s` : `${(seconds / 60).toFixed(1)} min`;
+  if (seconds < 60) {
+    return `${seconds.toFixed(1)} s`;
+  }
+
+  return seconds < 3600 ? `${(seconds / 60).toFixed(1)} min` : `${(seconds / 3600).toFixed(1)} h`;
 }
 
 /** "orders.order-created" → "Order created"; "api" → "API". */

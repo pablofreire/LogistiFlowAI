@@ -32,7 +32,6 @@ export function DashboardPage() {
   const { orders, inventory, fulfillment, shipping } = data;
   const byStatus = orders?.byStatus ?? {};
   const totalOrders = orders?.totalOrders ?? 0;
-  const failed = byStatus.Failed ?? 0;
 
   return (
     <Stack gap="lg">
@@ -57,7 +56,13 @@ export function DashboardPage() {
         <KpiCard testId="kpi-total-orders" label="Total orders" value={formatNumber(orders?.totalOrders)} hint={`${formatNumber(orders?.createdLast24Hours)} in the last 24 h`} icon={<IconPackage size={22} />} />
         <KpiCard testId="kpi-fulfillment-jobs" label="Fulfillment jobs" value={formatNumber(fulfillment?.totalJobs)} hint={`${formatNumber(fulfillment?.byStatus.Picking)} picking now`} icon={<IconTruckDelivery size={22} />} />
         <KpiCard testId="kpi-reserved-units" label="Reserved units" value={formatNumber(inventory?.totalReserved)} hint={`${formatNumber(inventory?.totalAvailable)} available`} icon={<IconBox size={22} />} />
-        <KpiCard testId="kpi-time-to-picking" label="Avg. time to picking" value={formatDuration(orders?.averageSecondsToPicking)} hint={`${formatNumber(failed)} orders failed`} icon={<IconClockHour4 size={22} />} />
+        <KpiCard
+          testId="kpi-processing-time"
+          label="Avg. processing time"
+          value={formatDuration(orders?.averageSecondsToDelivered)}
+          hint={`Created → delivered · ${formatDuration(orders?.averageSecondsToShipped)} to ship`}
+          icon={<IconClockHour4 size={22} />}
+        />
       </SimpleGrid>
 
       <SimpleGrid cols={{ base: 1, xs: 2, lg: 4 }}>

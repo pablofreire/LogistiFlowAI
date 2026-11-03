@@ -598,6 +598,8 @@
           "byStatus",
           "createdLast24Hours",
           "averageSecondsToPicking",
+          "averageSecondsToShipped",
+          "averageSecondsToDelivered",
           "recentActivity"
         ],
         "type": "object",
@@ -618,6 +620,20 @@
             "format": "int64"
           },
           "averageSecondsToPicking": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "averageSecondsToShipped": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "averageSecondsToDelivered": {
             "type": [
               "null",
               "number"

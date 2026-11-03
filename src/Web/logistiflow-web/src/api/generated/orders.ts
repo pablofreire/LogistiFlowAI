@@ -358,6 +358,10 @@ export interface components {
             createdLast24Hours: number;
             /** Format: double */
             averageSecondsToPicking: null | number;
+            /** Format: double */
+            averageSecondsToShipped: null | number;
+            /** Format: double */
+            averageSecondsToDelivered: null | number;
             recentActivity: components["schemas"]["RecentOrderActivity"][];
         };
         OrderDetails: {
