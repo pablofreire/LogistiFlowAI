@@ -44,7 +44,8 @@ flowchart LR
 | **Web** | React + TypeScript console: dashboard, orders, fulfillment queue, shipments, exceptions, inventory |
 
 More: [architecture overview](docs/architecture/overview.md) · [Phase 1 spec](docs/specifications/phase-1-order-to-fulfillment.md) ·
-[Phase 2 spec](docs/specifications/phase-2-fulfillment-to-delivery.md) · [ADRs](docs/decisions).
+[Phase 2 spec](docs/specifications/phase-2-fulfillment-to-delivery.md) ·
+[Phase 3 spec](docs/specifications/phase-3-processing-time-and-responsive.md) · [ADRs](docs/decisions).
 
 ### Engineering highlights
 
@@ -123,7 +124,7 @@ predates Phase 2; shipping and carrier tracking have not been load tested yet.
 |---|---|---|
 | 0–1 | Foundation, Orders, Inventory, Fulfillment, Gateway, web console, tests, compose, CI | Done |
 | 2 | Shipping service and deterministic carrier simulator, pick/pack/ship, tracking, exceptions, and the fulfillment, shipments and exceptions pages (moved up from Phase 3) | Done |
-| 3 | "Average processing time" KPI, responsive checks for the new pages, UI polish | Planned |
+| 3 | "Average processing time" KPI, responsive checks for the new pages, demo flow to delivery (done); UI polish (not started) | Done, except UI polish |
 | 4 | AI Operations Copilot (Microsoft Agent Framework, read-only tools, deterministic demo provider) | Planned |
 | 5 | Custom MCP server and Claude Code skills | Planned |
 | 6 | Observability stack, consumer concurrency, full k6 suite | Planned |
