@@ -13,6 +13,9 @@
   <Folder Name="/src/Gateway/">
     <Project Path="src/Gateway/LogistiFlow.Gateway/LogistiFlow.Gateway.csproj" />
   </Folder>
+  <Folder Name="/src/Mcp/">
+    <Project Path="src/Mcp/LogistiFlow.McpServer/LogistiFlow.McpServer.csproj" />
+  </Folder>
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/Orders/">
     <Project Path="src/Services/Orders/LogistiFlow.Orders.Domain/LogistiFlow.Orders.Domain.csproj" />
@@ -48,6 +51,7 @@
     <Project Path="src/Simulators/LogistiFlow.CarrierSimulator/LogistiFlow.CarrierSimulator.csproj" />
   </Folder>
   <Folder Name="/tests/unit/">
+    <Project Path="tests/unit/LogistiFlow.McpServer.UnitTests/LogistiFlow.McpServer.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.Orders.UnitTests/LogistiFlow.Orders.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.Inventory.UnitTests/LogistiFlow.Inventory.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.Fulfillment.UnitTests/LogistiFlow.Fulfillment.UnitTests.csproj" />
@@ -55,6 +59,7 @@
     <Project Path="tests/unit/LogistiFlow.AiOperations.UnitTests/LogistiFlow.AiOperations.UnitTests.csproj" />
     <Project Path="tests/unit/LogistiFlow.BuildingBlocks.UnitTests/LogistiFlow.BuildingBlocks.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/tests/" />
   <Folder Name="/tests/architecture/">
     <Project Path="tests/architecture/LogistiFlow.ArchitectureTests/LogistiFlow.ArchitectureTests.csproj" />
   </Folder>
