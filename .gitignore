@@ -1,8 +1,6 @@
 # .NET build output
 [Bb]in/
 [Oo]bj/
-[Dd]ebug/
-[Rr]elease/
 artifacts/
 TestResults/
 *.binlog
