@@ -7,12 +7,17 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace LogistiFlow.McpServer.UnitTests.Gateway;
 
 /// <summary>Status codes and transport failures become outcomes with messages, never exceptions or invented data.</summary>
-public sealed class GatewayClientTests
+public sealed class GatewayClientTests : IDisposable
 {
     private readonly FakeGateway _gateway = new();
+    private readonly HttpClient _http;
 
-    private GatewayClient Client() =>
-        new(new HttpClient(_gateway.CreateHandler()) { BaseAddress = new Uri("http://gateway.test/") }, NullLogger<GatewayClient>.Instance);
+    public GatewayClientTests() =>
+        _http = new HttpClient(_gateway.CreateHandler()) { BaseAddress = new Uri("http://gateway.test/") };
+
+    public void Dispose() => _http.Dispose();
+
+    private GatewayClient Client() => new(_http, NullLogger<GatewayClient>.Instance);
 
     [Fact]
     public async Task UnreachableGateway_IsUnavailable()

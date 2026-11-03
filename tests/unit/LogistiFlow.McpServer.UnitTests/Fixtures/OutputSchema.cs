@@ -46,12 +46,9 @@ public static class OutputSchema
 
             if (schema.TryGetProperty("properties", out var properties))
             {
-                foreach (var property in properties.EnumerateObject())
+                foreach (var property in properties.EnumerateObject().Where(property => instance.TryGetProperty(property.Name, out _)))
                 {
-                    if (instance.TryGetProperty(property.Name, out var value))
-                    {
-                        Check(root, property.Value, value, $"{path}.{property.Name}", violations);
-                    }
+                    Check(root, property.Value, instance.GetProperty(property.Name), $"{path}.{property.Name}", violations);
                 }
             }
         }

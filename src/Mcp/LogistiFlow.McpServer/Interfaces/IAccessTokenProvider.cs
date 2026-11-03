@@ -3,6 +3,7 @@ namespace LogistiFlow.McpServer.Interfaces;
 /// <summary>Supplies the bearer token the server sends to the gateway.</summary>
 public interface IAccessTokenProvider
 {
+    /// <summary>Returns the configured token, or a cached one from signing in to the gateway.</summary>
     /// <exception cref="Exceptions.GatewaySignInException">The gateway did not accept the configured credentials.</exception>
     ValueTask<string> GetTokenAsync(CancellationToken cancellationToken);
 

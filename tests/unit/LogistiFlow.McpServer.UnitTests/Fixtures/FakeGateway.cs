@@ -15,10 +15,10 @@ public sealed class FakeGateway
     public ConcurrentQueue<RecordedRequest> Requests { get; } = new();
 
     public FakeGateway Ok(string path, object data, string method = "GET") =>
-        On(method, path, HttpStatusCode.OK, new { data, error = (object?)null });
+        On(method, path, HttpStatusCode.OK, new Envelope(data, null));
 
     public FakeGateway Fail(string path, HttpStatusCode status, string message, string method = "GET") =>
-        On(method, path, status, new { data = (object?)null, error = new { code = "error", message } });
+        On(method, path, status, new Envelope(null, new { code = "error", message }));
 
     public FakeGateway On(string method, string path, HttpStatusCode status, object body)
     {
@@ -46,7 +46,10 @@ public sealed class FakeGateway
 
             return gateway._routes.TryGetValue($"{request.Method.Method} {uri.AbsolutePath}", out var respond)
                 ? respond()
-                : new HttpResponseMessage(HttpStatusCode.NotFound) { Content = JsonContent.Create(new { data = (object?)null, error = new { code = "not_found", message = $"No fake route for {uri.AbsolutePath}." } }) };
+                : new HttpResponseMessage(HttpStatusCode.NotFound) { Content = JsonContent.Create(new Envelope(null, new { code = "not_found", message = $"No fake route for {uri.AbsolutePath}." })) };
         }
     }
+
+    /// <summary>The gateway's <c>{ data, error }</c> envelope.</summary>
+    private sealed record Envelope(object? Data, object? Error);
 }

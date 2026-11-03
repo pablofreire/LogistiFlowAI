@@ -6,39 +6,43 @@ namespace LogistiFlow.IntegrationTests.Fixtures;
 /// </summary>
 public sealed class GatewayRoutingHandler(LogistiFlowEnvironment environment) : HttpMessageHandler
 {
-    private readonly (string Prefix, HttpMessageInvoker Service)[] _routes =
-    [
-        ("/api/orders", new HttpMessageInvoker(environment.Orders.Server.CreateHandler())),
-        ("/api/metrics/orders", new HttpMessageInvoker(environment.Orders.Server.CreateHandler())),
-        ("/api/inventory", new HttpMessageInvoker(environment.Inventory.Server.CreateHandler())),
-        ("/api/metrics/inventory", new HttpMessageInvoker(environment.Inventory.Server.CreateHandler())),
-        ("/api/fulfillment", new HttpMessageInvoker(environment.Fulfillment.Server.CreateHandler())),
-        ("/api/metrics/fulfillment", new HttpMessageInvoker(environment.Fulfillment.Server.CreateHandler())),
-        ("/api/shipping", new HttpMessageInvoker(environment.Shipping.Server.CreateHandler())),
-        ("/api/metrics/shipping", new HttpMessageInvoker(environment.Shipping.Server.CreateHandler())),
-    ];
+    private readonly HttpMessageInvoker _orders = new(environment.Orders.Server.CreateHandler());
+    private readonly HttpMessageInvoker _inventory = new(environment.Inventory.Server.CreateHandler());
+    private readonly HttpMessageInvoker _fulfillment = new(environment.Fulfillment.Server.CreateHandler());
+    private readonly HttpMessageInvoker _shipping = new(environment.Shipping.Server.CreateHandler());
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         var path = request.RequestUri!.AbsolutePath;
-        var route = _routes.FirstOrDefault(route => path == route.Prefix || path.StartsWith(route.Prefix + "/", StringComparison.Ordinal));
-        return route.Service is null
-            ? throw new InvalidOperationException($"The gateway has no route for {path}.")
-            : route.Service.SendAsync(request, cancellationToken);
+        var service = ServiceFor(path) ?? throw new InvalidOperationException($"The gateway has no route for {path}.");
+        return service.SendAsync(request, cancellationToken);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            foreach (var (_, service) in _routes)
-            {
-                service.Dispose();
-            }
+            _orders.Dispose();
+            _inventory.Dispose();
+            _fulfillment.Dispose();
+            _shipping.Dispose();
         }
 
         base.Dispose(disposing);
     }
+
+    private HttpMessageInvoker? ServiceFor(string path) =>
+        Owns(path, "orders") ? _orders
+        : Owns(path, "inventory") ? _inventory
+        : Owns(path, "fulfillment") ? _fulfillment
+        : Owns(path, "shipping") ? _shipping
+        : null;
+
+    // Each service owns "/api/{service}/..." and "/api/metrics/{service}", as in ProxyConfiguration.
+    private static bool Owns(string path, string service) =>
+        path.StartsWith($"/api/{service}/", StringComparison.Ordinal)
+        || path == $"/api/{service}"
+        || path == $"/api/metrics/{service}";
 }
