@@ -27,4 +27,8 @@ most, timeouts and 503s, only exist over a real network call.
 - Every scenario is reproducible in tests, in compose and in demos without external accounts or cost.
 - Restarting the simulator forgets bookings; tracking for shipments booked before the restart fails until it is
   retried manually. Acceptable for a simulator; documented here.
+- Tracking numbers never repeat across restarts: the sequence starts at the Unix time in milliseconds. Until
+  2026-11-03 it started at a fixed value, so a restart against a persisted Shipping database reissued stored numbers,
+  `ix_shipments_tracking_number` rejected the booking and new shipments stayed in "Awaiting booking" (found when a
+  rebuilt compose stack failed E2E-005/006/007).
 - The simulator is not a contract test of any real carrier API.

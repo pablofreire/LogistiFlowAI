@@ -6,13 +6,16 @@ namespace LogistiFlow.CarrierSimulator.Booking;
 /// <summary>
 /// In-memory bookings, keyed by the client's <c>Idempotency-Key</c> and by tracking number. A simulator restart
 /// forgets them; LogistiFlow then sees "tracking not found" and keeps retrying, which is documented.
+/// Tracking numbers continue from the clock (Unix milliseconds at startup), so a restarted simulator never reissues a
+/// number an earlier run handed out, as a real carrier never would; that holds unless a run averaged more than one
+/// booking per millisecond.
 /// </summary>
-public sealed class BookingStore
+public sealed class BookingStore(TimeProvider timeProvider)
 {
     private readonly ConcurrentDictionary<string, CarrierBooking> _byKey = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CarrierBooking> _byTracking = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, int> _attemptsByKey = new(StringComparer.Ordinal);
-    private long _sequence = 10_000_000;
+    private long _sequence = timeProvider.GetUtcNow().ToUnixTimeMilliseconds();
 
     /// <summary>Every booking call for a key, including rejected and replayed ones.</summary>
     public int RegisterAttempt(string idempotencyKey) => _attemptsByKey.AddOrUpdate(idempotencyKey, 1, (_, count) => count + 1);
