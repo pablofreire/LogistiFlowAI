@@ -163,6 +163,38 @@ services:
       Simulator__StepInterval: ${CARRIER_STEP_INTERVAL:-00:00:03}
       Simulator__TimeoutDelay: "00:00:15"
 
+  aioperations-migrate:
+    profiles: ["app"]
+    image: logistiflow/aioperations-api:local
+    build: { <<: *dotnet-build, args: { PROJECT: src/Services/AiOperations/LogistiFlow.AiOperations.Api, ASSEMBLY: LogistiFlow.AiOperations.Api.dll } }
+    command: ["--migrate"]
+    environment:
+      <<: *service-env
+      Database__ConnectionString: Host=postgres;Port=5432;Database=logistiflow_aiops;Username=${POSTGRES_USER:-logistiflow};Password=${POSTGRES_PASSWORD:-logistiflow_dev}
+    depends_on: *depends-infra
+    healthcheck: { disable: true }
+
+  # The operations copilot. Without AI_PROVIDER_API_KEY and AI_PROVIDER_MODEL it answers with the deterministic demo
+  # provider (labelled as simulated). The gateway does not wait for it: the platform works without the copilot.
+  aioperations-api:
+    profiles: ["app"]
+    image: logistiflow/aioperations-api:local
+    environment:
+      <<: *service-env
+      Database__ConnectionString: Host=postgres;Port=5432;Database=logistiflow_aiops;Username=${POSTGRES_USER:-logistiflow};Password=${POSTGRES_PASSWORD:-logistiflow_dev}
+      Services__Orders: http://orders-api:8080
+      Services__Inventory: http://inventory-api:8080
+      Services__Fulfillment: http://fulfillment-api:8080
+      Services__Shipping: http://shipping-api:8080
+      AiProvider__Endpoint: ${AI_PROVIDER_ENDPOINT:-}
+      AiProvider__ApiKey: ${AI_PROVIDER_API_KEY:-}
+      AiProvider__Model: ${AI_PROVIDER_MODEL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      aioperations-migrate:
+        condition: service_completed_successfully
+
   gateway-migrate:
     profiles: ["app"]
     image: logistiflow/gateway:local
@@ -185,6 +217,7 @@ services:
       Services__Inventory: http://inventory-api:8080
       Services__Fulfillment: http://fulfillment-api:8080
       Services__Shipping: http://shipping-api:8080
+      Services__AiOperations: http://aioperations-api:8080
       RateLimiting__Login__PermitLimit: ${LOGIN_RATE_LIMIT:-30}
     ports:
       - "${GATEWAY_PORT:-8089}:8080"

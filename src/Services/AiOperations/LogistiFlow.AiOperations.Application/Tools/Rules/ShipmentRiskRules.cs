@@ -37,7 +37,6 @@ public static class ShipmentRiskRules
         ArgumentNullException.ThrowIfNull(shipment);
 
         var daysLate = DaysLateVersusPromise(shipment.PromisedDeliveryDate, shipment.EstimatedDelivery, shipment.DeliveredAt);
-        var openExceptions = shipment.Exceptions.Where(exception => exception.Status == OpenStatus).ToList();
         var latestEvent = shipment.TrackingEvents.OrderBy(trackingEvent => trackingEvent.OccurredAt).LastOrDefault();
 
         return new DelayAnalysisData(
@@ -51,7 +50,7 @@ public static class ShipmentRiskRules
             shipment.DeliveredAt,
             daysLate,
             shipment.IsDelayed,
-            openExceptions,
+            [.. shipment.Exceptions.OrderBy(exception => exception.OpenedAt)],
             latestEvent,
             Assess(shipment.Status, shipment.IsDelayed, daysLate));
     }

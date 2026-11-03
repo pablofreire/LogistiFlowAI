@@ -11,6 +11,7 @@
     <ProjectReference Include="../../../src/Services/Inventory/LogistiFlow.Inventory.Api/LogistiFlow.Inventory.Api.csproj" />
     <ProjectReference Include="../../../src/Services/Fulfillment/LogistiFlow.Fulfillment.Api/LogistiFlow.Fulfillment.Api.csproj" />
     <ProjectReference Include="../../../src/Services/Shipping/LogistiFlow.Shipping.Api/LogistiFlow.Shipping.Api.csproj" />
+    <ProjectReference Include="../../../src/Services/AiOperations/LogistiFlow.AiOperations.Api/LogistiFlow.AiOperations.Api.csproj" />
     <ProjectReference Include="../../../src/Simulators/LogistiFlow.CarrierSimulator/LogistiFlow.CarrierSimulator.csproj" />
   </ItemGroup>
 

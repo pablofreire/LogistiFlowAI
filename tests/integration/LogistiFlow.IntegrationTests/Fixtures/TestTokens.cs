@@ -22,7 +22,7 @@ public static class TestTokens
             IssuedAt = now.AddMinutes(-5),
             NotBefore = now.AddMinutes(-5),
             Expires = now.Add(lifetime ?? TimeSpan.FromHours(1)),
-            Subject = new ClaimsIdentity([new Claim("sub", "integration-tests"), new Claim("name", "Integration Tests"), new Claim("role", role)]),
+            Subject = new ClaimsIdentity([new Claim("sub", "integration-tests"), new Claim("name", "Integration Tests"), new Claim("email", $"{role.ToLowerInvariant()}@integration.tests"), new Claim("role", role)]),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey ?? SigningKey)), SecurityAlgorithms.HmacSha256),
         };
         return new JsonWebTokenHandler().CreateToken(descriptor);

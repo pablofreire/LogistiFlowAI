@@ -122,6 +122,11 @@ jobs:
             args: |
               PROJECT=src/Services/Shipping/LogistiFlow.Shipping.Api
               ASSEMBLY=LogistiFlow.Shipping.Api.dll
+          - image: aioperations-api
+            dockerfile: deploy/docker/dotnet.Dockerfile
+            args: |
+              PROJECT=src/Services/AiOperations/LogistiFlow.AiOperations.Api
+              ASSEMBLY=LogistiFlow.AiOperations.Api.dll
           - image: carrier-simulator
             dockerfile: deploy/docker/dotnet.Dockerfile
             args: |

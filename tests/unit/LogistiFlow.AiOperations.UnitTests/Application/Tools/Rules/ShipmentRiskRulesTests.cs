@@ -28,7 +28,7 @@ public sealed class ShipmentRiskRulesTests
 
         analysis.Assessment.Should().Be("Delayed: the carrier reported a delay and the estimate is 2 day(s) after the promised date.");
         analysis.DaysLateVersusPromise.Should().Be(2);
-        analysis.OpenExceptions.Should().ContainSingle().Which.Details.Should().Contain("severe weather");
+        analysis.Exceptions.Should().HaveCount(2).And.OnlyContain(exception => exception.Details.Contains("severe weather", StringComparison.Ordinal));
         analysis.LatestEvent!.Code.Should().Be("DELAYED");
     }
 

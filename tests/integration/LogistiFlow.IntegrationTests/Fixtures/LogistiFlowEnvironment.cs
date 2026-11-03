@@ -1,5 +1,9 @@
 using System.Reflection;
 using Dapper;
+using LogistiFlow.AiOperations.Api.Composition;
+using LogistiFlow.AiOperations.Application.Interfaces;
+using LogistiFlow.AiOperations.Infrastructure.DependencyInjection;
+using LogistiFlow.AiOperations.Infrastructure.Services;
 using LogistiFlow.BuildingBlocks.Infrastructure.Persistence.Configuration;
 using LogistiFlow.BuildingBlocks.Infrastructure.Persistence.Connections;
 using LogistiFlow.BuildingBlocks.Infrastructure.Persistence.Migrations;
@@ -28,6 +32,7 @@ namespace LogistiFlow.IntegrationTests.Fixtures;
 /// The whole platform for one test run: real PostgreSQL 17 and RabbitMQ 4.1 containers, one database per
 /// service, and the four services hosted in-process with their outbox relays and consumers running. Shipping talks
 /// to the carrier simulator over its in-memory test server, with compressed time (one tracking step per 200 ms).
+/// AiOperations (demo provider) reads the four services through their in-memory test servers.
 /// <para>
 /// <see cref="IsolatedOrders"/> is a second Orders instance on its own database with the relay and consumer
 /// switched off and the broker address pointing at a closed port. Tests use it to drive messaging by hand.
@@ -59,6 +64,8 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
 
     public ServiceFactory<CarrierSimulatorMarker> CarrierSimulator { get; private set; } = null!;
 
+    public ServiceFactory<AiOperationsApiMarker> AiOperations { get; private set; } = null!;
+
     public ServiceFactory<OrdersApiMarker> IsolatedOrders { get; private set; } = null!;
 
     /// <summary>Inventory on its own seeded database with messaging switched off; tests call its use cases directly.</summary>
@@ -80,6 +87,7 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
         Migrate(Databases.Inventory, InventoryInfrastructureServiceCollectionExtensions.MigrationsAssembly);
         Migrate(Databases.Fulfillment, FulfillmentInfrastructureServiceCollectionExtensions.MigrationsAssembly);
         Migrate(Databases.Shipping, ShippingInfrastructureServiceCollectionExtensions.MigrationsAssembly);
+        Migrate(Databases.AiOperations, AiOperationsInfrastructureServiceCollectionExtensions.MigrationsAssembly);
         Migrate(Databases.IsolatedOrders, OrdersInfrastructureServiceCollectionExtensions.MigrationsAssembly);
         Migrate(Databases.IsolatedInventory, InventoryInfrastructureServiceCollectionExtensions.MigrationsAssembly);
         Migrate(Databases.Probe);
@@ -109,6 +117,18 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
             shippingSettings,
             services => services.AddHttpClient<ICarrierGateway, CarrierApiGateway>()
                 .ConfigurePrimaryHttpMessageHandler(() => CarrierSimulator.Server.CreateHandler()));
+        var aiSettings = Settings(Databases.AiOperations);
+        aiSettings["Services:Orders"] = "http://orders/";
+        aiSettings["Services:Inventory"] = "http://inventory/";
+        aiSettings["Services:Fulfillment"] = "http://fulfillment/";
+        aiSettings["Services:Shipping"] = "http://shipping/";
+        AiOperations = new ServiceFactory<AiOperationsApiMarker>(aiSettings, services =>
+        {
+            services.AddHttpClient<IOrdersApi, OrdersApiClient>().ConfigurePrimaryHttpMessageHandler(() => Orders.Server.CreateHandler());
+            services.AddHttpClient<IInventoryApi, InventoryApiClient>().ConfigurePrimaryHttpMessageHandler(() => Inventory.Server.CreateHandler());
+            services.AddHttpClient<IFulfillmentApi, FulfillmentApiClient>().ConfigurePrimaryHttpMessageHandler(() => Fulfillment.Server.CreateHandler());
+            services.AddHttpClient<IShippingApi, ShippingApiClient>().ConfigurePrimaryHttpMessageHandler(() => Shipping.Server.CreateHandler());
+        });
         IsolatedOrders = new ServiceFactory<OrdersApiMarker>(Settings(Databases.IsolatedOrders, brokerPort: 1, messagingEnabled: false));
         IsolatedInventory = new ServiceFactory<InventoryApiMarker>(Settings(Databases.IsolatedInventory, brokerPort: 1, messagingEnabled: false));
 
@@ -118,6 +138,7 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
         _ = Fulfillment.Server;
         _ = CarrierSimulator.Server;
         _ = Shipping.Server;
+        _ = AiOperations.Server;
         _ = IsolatedOrders.Server;
         _ = IsolatedInventory.Server;
         await WaitForQueuesAsync();
@@ -129,6 +150,7 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
         await Inventory.DisposeAsync();
         await Fulfillment.DisposeAsync();
         await Shipping.DisposeAsync();
+        await AiOperations.DisposeAsync();
         await CarrierSimulator.DisposeAsync();
         await IsolatedOrders.DisposeAsync();
         await IsolatedInventory.DisposeAsync();
@@ -193,6 +215,7 @@ public sealed class LogistiFlowEnvironment : IAsyncLifetime
         public const string Inventory = "logistiflow_inventory";
         public const string Fulfillment = "logistiflow_fulfillment";
         public const string Shipping = "logistiflow_shipping";
+        public const string AiOperations = "logistiflow_aiops";
         public const string IsolatedOrders = "logistiflow_orders_isolated";
         public const string IsolatedInventory = "logistiflow_inventory_isolated";
         public const string Probe = "logistiflow_probe";

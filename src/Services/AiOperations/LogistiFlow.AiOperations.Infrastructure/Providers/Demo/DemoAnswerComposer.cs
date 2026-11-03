@@ -45,16 +45,17 @@ public static class DemoAnswerComposer
             Line(text, $"Delivered at {Timestamp(delivered)}.");
         }
 
-        if (delay.OpenExceptions.Count == 0)
+        if (delay.Exceptions.Count == 0)
         {
-            Line(text, "Open exceptions: none.");
+            Line(text, "Exceptions: none.");
         }
         else
         {
-            Line(text, "Open exceptions:");
-            foreach (var exception in delay.OpenExceptions)
+            Line(text, "Exceptions:");
+            foreach (var exception in delay.Exceptions)
             {
-                Line(text, $"- {exception.Type}: {exception.Details} (opened {Timestamp(exception.OpenedAt)})");
+                var resolved = exception.ResolvedAt is { } at ? $", resolved {Timestamp(at)}" : string.Empty;
+                Line(text, $"- {exception.Type} ({exception.Status}): {exception.Details} (opened {Timestamp(exception.OpenedAt)}{resolved})");
             }
         }
 

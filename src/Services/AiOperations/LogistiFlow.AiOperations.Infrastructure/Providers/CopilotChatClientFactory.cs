@@ -17,8 +17,11 @@ public sealed class CopilotChatClientFactory(IOptions<AiProviderOptions> options
 {
     private readonly AiProviderOptions _settings = options.Value;
 
+    // An empty setting binds to an empty relative URI; only an absolute one is an endpoint.
+    private Uri? Endpoint => _settings.Endpoint is { IsAbsoluteUri: true } endpoint ? endpoint : null;
+
     public CopilotProvider Provider => _settings.IsConfigured
-        ? new CopilotProvider(ProviderName(_settings.Endpoint), _settings.Model!, Simulated: false)
+        ? new CopilotProvider(ProviderName(Endpoint), _settings.Model!, Simulated: false)
         : new CopilotProvider(DemoOperationsChatClient.ProviderName, DemoOperationsChatClient.ModelName, Simulated: true);
 
     public IChatClient Create()
@@ -29,7 +32,7 @@ public sealed class CopilotChatClientFactory(IOptions<AiProviderOptions> options
         }
 
         var clientOptions = new OpenAIClientOptions();
-        if (_settings.Endpoint is { } endpoint)
+        if (Endpoint is { } endpoint)
         {
             clientOptions.Endpoint = endpoint;
         }
